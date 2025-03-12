@@ -31,6 +31,6 @@ jobs:
         gcloud run deploy streamlit-app \
           --image europe-west1-docker.pkg.dev/car-scraping-450821/docker-repo/streamlit-app:latest
           --platform managed \
-          --region eu-west1 \
+          --region europe-west1 \
           --service-account streamlit-service-account@car-scraping-450821.iam.gserviceaccount.com \
           --allow-unauthenticated
