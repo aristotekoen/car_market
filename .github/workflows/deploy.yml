@@ -26,11 +26,15 @@ jobs:
         gcloud auth configure-docker
         gcloud builds submit --tag europe-west1-docker.pkg.dev/car-scraping-450821/docker-repo/streamlit-app:latest app/
 
+    - name: Set default region for Cloud Run
+      run: |
+        gcloud config set run/region europe-west1
+
     - name: Deploy to Cloud Run
       run: |
         gcloud run deploy streamlit-app \
-          --image europe-west1-docker.pkg.dev/car-scraping-450821/docker-repo/streamlit-app:latest
-          --platform managed \
-          --region europe-west1 \
-          --service-account streamlit-service-account@car-scraping-450821.iam.gserviceaccount.com \
+          --image=europe-west1-docker.pkg.dev/car-scraping-450821/docker-repo/streamlit-app:latest \
+          --platform=managed \
+          --region=europe-west1 \
+          --service-account=streamlit-service-account@car-scraping-450821.iam.gserviceaccount.com \
           --allow-unauthenticated
