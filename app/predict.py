@@ -1,34 +1,39 @@
 import pandas as pd
 from catboost import Pool, CatBoostRegressor
-import catboost
-import matplotlib.pyplot as plt
 import numpy as np
 import streamlit as st
 import pickle
+from google.cloud import storage
+import os
+from dotenv import load_dotenv
+from const import *
 
 
-def load_model(path):
-    cb = CatBoostRegressor().load_model(path)
+def load_model():
+    client = storage.Client()
+    bucket = client.get_bucket('price-estimation')
+    blob = bucket.blob('models/catboost_extras')
+    model_name = 'catboost_extras'
+    blob.download_to_filename(model_name)
+    cb = CatBoostRegressor().load_model(model_name)
     return cb
+
+def load_car_dictionnary():
+    client = storage.Client()
+    bucket = client.get_bucket('price-estimation')
+    blob = bucket.blob('data/car_dictionary.pkl')
+    dict_name = 'car_dictionary.pkl'
+    blob.download_to_filename(dict_name)
+    with open(dict_name, 'rb') as f:
+        cars_dict = pickle.load(f)
+    return cars_dict
 
 def create_dict_for_pred(model):
     return {k: np.nan for k in model.feature_names_}
 
-catboost_model = CatBoostRegressor().load_model('data/models/catboost_extras')
+catboost_model = load_model()
 feature_names = catboost_model.feature_names_
-with open('data/car_dictionary.pkl', 'rb') as f:
-    cars_dict = pickle.load(f)
-
-fuel_types = ['plug_in_hybrid_petrol', 'diesel', 'petrol', 'lpg', 'hybrid_petrol','hybrid_diesel', 'electric', 'cng', 'plug_in_hybrid_diesel','other','hydrogen']
-gearbox_types = ['automatic', 'manual', 'semi_automatic']
-interior_types = ['fabric', 'leather_fabric', 'leather', 'alcantara', 'velours', 'other']
-exterior_colors = ['black', 'white', 'blue','silver','purple','grey','red','light_blue', 'other','beige','brown','green','yellow','gold','chrome','burgundy','orange','lemon','pink']
-interior_colors = ['black', 'two_colors', 'grey', 'beige', 'brown', 'other', 'white', 'red']
-number_plate_endings = ['odd', 'unknown', 'even', 'without', 'historic']
-drive_types = ['FWD', '4WD', 'RWD', 'AWD']
-body_types =['hatchback','sedan','SUV','Pick-Up','van','station wagon','coupe','Hochdach-Kombi']
-lat = 37.983810
-longitude = 23.727539
+cars_dict = load_car_dictionnary()
 
 
 mileage = st.number_input("Mileage in km", value=10000, format="%.2f")
@@ -139,4 +144,3 @@ if st.button("Predict car price"):
     df_pool = Pool(df_input, cat_features=catboost_model.get_cat_feature_indices())
     price = catboost_model.predict(df_input)
     st.success(f"prix estime: {price}")
-
