@@ -1,23 +1,24 @@
-import pandas as pd
-from catboost import Pool, CatBoostRegressor
-import numpy as np
-import streamlit as st
 import pickle
+
+import numpy as np
+import pandas as pd
+import streamlit as st
+from catboost import Pool, CatBoostRegressor
 from google.cloud import storage
-import os
-from dotenv import load_dotenv
+
 from const import *
 
-
+@st.cache_resource
 def load_model():
     client = storage.Client()
     bucket = client.get_bucket('price-estimation')
     blob = bucket.blob('models/catboost_all_extras.cbm')
-    model_name = 'catboost_extras'
+    model_name = 'catboost_all_extras.cbm'
     blob.download_to_filename(model_name)
     cb = CatBoostRegressor().load_model(model_name)
     return cb
 
+@st.cache_data
 def load_car_dictionnary():
     client = storage.Client()
     bucket = client.get_bucket('price-estimation')
@@ -31,24 +32,9 @@ def load_car_dictionnary():
 def create_dict_for_pred(model):
     return {k: np.nan for k in model.feature_names_}
 
-
-def load_train_test():
-    client = storage.Client()
-    bucket = client.get_bucket('price-estimation')
-    blob_train = bucket.get_blob('data/train_test_sets/train_02032024.csv')
-    blob_test = bucket.get_blob('data/train_test_sets/test_02032024.csv')
-    train_name = "train_02032024.csv"
-    test_name = "test_02032024.csv"
-    blob_train.download_to_filename(train_name)
-    blob_test.download_to_filename(test_name)
-
-
-    train = pd.read_csv(train_name, index_col=0)
-    test = pd.read_csv(test_name, index_col=0)
-    return train, test
-
 catboost_model = load_model()
 feature_names = catboost_model.feature_names_
+
 cars_dict = load_car_dictionnary()
 
 st.title(':car: AI powered Used Car Price Estimator')
@@ -182,6 +168,7 @@ if st.button("Predict car price"):
  'drive_type': drive_type,
  'doors': doors,
  'is_metallic': is_metallic}
+
 
     user_input.update(rest_dict)
     df_input = pd.DataFrame([user_input], columns=feature_names)
