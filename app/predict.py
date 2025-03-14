@@ -12,7 +12,7 @@ from const import *
 def load_model():
     client = storage.Client()
     bucket = client.get_bucket('price-estimation')
-    blob = bucket.blob('models/catboost_extras')
+    blob = bucket.blob('models/catboost_all_extras.cbm')
     model_name = 'catboost_extras'
     blob.download_to_filename(model_name)
     cb = CatBoostRegressor().load_model(model_name)
