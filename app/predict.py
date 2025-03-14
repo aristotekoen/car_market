@@ -5,7 +5,8 @@ import pandas as pd
 import streamlit as st
 from catboost import Pool, CatBoostRegressor
 from google.cloud import storage
-
+import logging
+logging.basicConfig(level=logging.DEBUG)
 from const import *
 
 @st.cache_resource
@@ -60,39 +61,39 @@ body_type = st.selectbox("Body type", body_types, help="If unknown leave as is")
 
 st.header('ℹ️ Basic Information')
 
-mileage = st.number_input("Mileage in km", value=10000)
-registration_year = st.number_input("Registration year", min_value=2000, max_value=2025, format="%d")
+mileage = float(st.number_input("Mileage in km", value=10000))
+registration_year = float(st.number_input("Registration year", min_value=2000, max_value=2025, format="%d"))
 registration_month = st.slider("Registration month", min_value=1, max_value=12, step=1)
 fuel_type = st.selectbox("Fuel type", fuel_types)
 gearbox_type = st.selectbox("Gearbox type", gearbox_types)
-seats = st.slider("Number of seats", min_value=1, max_value=10, format="%d", value=5)
-doors = st.number_input("Number of doors", min_value=1, max_value=10, format="%d", value=5)
-rim_size = st.number_input("Rim size (inches)?", min_value=10, max_value=30, help="If  unknown leave empty, values should be between 10 and 30 inches")
-number_of_gears = st.number_input("Number of gears?", min_value=2, max_value=10, step=1, format="%d", help="If unknown leave as is")
+seats = float(st.slider("Number of seats", min_value=1, max_value=10, format="%d", value=5))
+doors = float(st.number_input("Number of doors", min_value=1, max_value=10, format="%d", value=5))
+rim_size = float(st.number_input("Rim size (inches)?", min_value=10, max_value=30, help="If  unknown leave empty, values should be between 10 and 30 inches"))
+number_of_gears = float(st.number_input("Number of gears?", min_value=2, max_value=10, step=1, format="%d", help="If unknown leave as is"))
 drive_type = st.selectbox("Drive type", drive_types, help="If unknown leave as is")
 number_plate_ending = st.selectbox("Number of plate endings", number_plate_endings)
 
 st.header('⚙️ Engine Information and performance')
 
-engine_size = st.number_input("Engine size in cc", value=1000)
-engine_power = st.number_input("Engine power in bhp", value=100)
-top_speed = st.number_input("Top Speed? (Km/h)", min_value=100, max_value=400, help="If unknown leave as is")
-torque = st.number_input("Torque? (N.m)", min_value=70, max_value=900, help="If unknown leave as is")
-acceleration = st.number_input("Acceleration? (seconds 0-100km/h)", min_value=1, max_value=40, step=1, help="If unknown leave as is")
+engine_size = float(st.number_input("Engine size in cc", value=1000))
+engine_power = float(st.number_input("Engine power in bhp", value=100))
+top_speed = float(st.number_input("Top Speed? (Km/h)", min_value=100, max_value=400, help="If unknown leave as is"))
+torque = float(st.number_input("Torque? (N.m)", min_value=70, max_value=900, help="If unknown leave as is"))
+acceleration = float(st.number_input("Acceleration? (seconds 0-100km/h)", min_value=1, max_value=40, step=1, help="If unknown leave as is"))
 
 st.header('🌱 Efficiency')
 
 fuel_consumption = st.number_input("Fuel consumption? L/100km", min_value=0, max_value=50, help="If unknown leave as is")
-battery_charge_time = st.slider("Battery charge time?", min_value=1, max_value=10, step=1, help="If not applicable leave as is")
-co2_emissions = st.number_input("CO2 emissions (g/km)", value=100)
+battery_charge_time = float(st.slider("Battery charge time?", min_value=1, max_value=10, step=1, help="If not applicable leave as is"))
+co2_emissions = float(st.number_input("CO2 emissions (g/km)", value=100))
 
 st.header('📐 Vehicle dimensions')
 
-vehicle_height = st.number_input("Vehicle height in mm", min_value= 800, max_value=2500, help="If unknown leave as is" )
-vehicle_width = st.number_input("Vehicle Width? (mm)", min_value=1000, max_value=3000, help="If unknown leave as is")
-vehicle_length = st.number_input("Vehicle length? (mm)", min_value=2500, max_value=7000, help="If unknown leave as is")
-wheel_base = st.number_input("Wheelbase? (mm)", min_value=1500, max_value=4000, help="If unknown leave as is")
-gross_weight = st.number_input("Gross Weight? (kg)", min_value=980, max_value=3500, help="If unknown leave as is")
+vehicle_height = float(st.number_input("Vehicle height in mm", min_value= 800, max_value=2500, help="If unknown leave as is" ))
+vehicle_width = float(st.number_input("Vehicle Width? (mm)", min_value=1000, max_value=3000, help="If unknown leave as is"))
+vehicle_length = float(st.number_input("Vehicle length? (mm)", min_value=2500, max_value=7000, help="If unknown leave as is"))
+wheel_base = float(st.number_input("Wheelbase? (mm)", min_value=1500, max_value=4000, help="If unknown leave as is"))
+gross_weight = float(st.number_input("Gross Weight? (kg)", min_value=980, max_value=3500, help="If unknown leave as is"))
 
 
 st.header('🔧 Vehicle condition and last technical check up')
@@ -109,10 +110,6 @@ interior_color = st.selectbox("Interior color", interior_colors, help="If unknow
 is_metallic = st.selectbox("Is your car paint color metallic?", [True, False], index=1)
 
 st.header('✨ Extras')
-#turbo = st.selectbox("Turbo?", [True, False])
-#steering_lights = st.selectbox("Steering lights?", [True, False])
-#collision_avoidance = st.selectbox("Collision avoidance?", [True, False])
-
 
 extra_options = ['extra_turbo','extra_steering_lights','extra_collision_avoidance_system','extra_trip_computer', 'extra_wheelchair', 'extra_apple_carplay', 'extra_leather_seats', 'extra_anti_theft_system_gps', 'extra_rain_sensor', 'extra_panoramic_roof', 'extra_dvd', 'extra_automatic_parking', 'extra_multi_purpose_steering_wheel', 'extra_tcs_asr', 'extra_tv_camera',    'extra_power_windows', 'extra_bucket_seats', 'extra_hitch', 'extra_aircondition(a_c)',    'extra_heated_seats', 'extra_power_seats', 'extra_alumium_rims', 'extra_locking_differential', 'extra_android_auto', 'extra_roof_rails', 'extra_armored', 'extra_lane_assist',    'extra_immobilizer', 'extra_rear_view_camera', 'extra_air_suspension', 'extra_bluetooth','extra_parktronic', 'extra_isofix_children_seats', 'extra_electric_sunroof', 'extra_abs','extra_telephone', 'extra_led_lights', 'extra_gps', 'extra_automatic_air_conditioning','extra_central_locking', 'extra_hill_assist', 'extra_tft_screen', 'extra_cd_player','extra_head_up_display', 'extra_service_book', 'extra_power_mirrors', 'extra_eco_start_stop','extra_alarm', 'extra_xenon', 'extra_fog_lights', 'extra_power_steering', 'extra_radio_player','extra_usb', 'extra_cruise_control', 'extra_keyless', 'extra_esp']
 
@@ -169,9 +166,14 @@ if st.button("Predict car price"):
  'doors': doors,
  'is_metallic': is_metallic}
 
-
     user_input.update(rest_dict)
+
     df_input = pd.DataFrame([user_input], columns=feature_names)
     df_pool = Pool(df_input, cat_features=catboost_model.get_cat_feature_indices())
-    price = catboost_model.predict(df_input)
+    try:
+        price = catboost_model.predict(df_input)
+    except Exception as e:
+        logging.error(f"Error loading model or making prediction: {str(e)}")
+        st.error(f"Prediction error: {str(e)}")
+
     st.success(f"prix estime: {price}")
