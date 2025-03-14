@@ -5,8 +5,6 @@ import pandas as pd
 import streamlit as st
 from catboost import Pool, CatBoostRegressor
 from google.cloud import storage
-import logging
-logging.basicConfig(level=logging.DEBUG)
 from const import *
 
 @st.cache_resource
@@ -164,16 +162,13 @@ if st.button("Predict car price"):
  'drive_type': drive_type,
  'doors': doors,
  'is_metallic': is_metallic}
-    try:
-        user_input.update(rest_dict)
-        catboost_model = load_model()
-        feature_names = catboost_model.feature_names_
-        df_input = pd.DataFrame([user_input], columns=feature_names)
-        df_pool = Pool(df_input, cat_features=catboost_model.get_cat_feature_indices())
 
-        price = catboost_model.predict(df_input)
-    except Exception as e:
-        logging.error(f"Error loading model or making prediction: {str(e)}")
-        st.error(f"Prediction error: {str(e)}")
+    user_input.update(rest_dict)
+    catboost_model = load_model()
+    feature_names = catboost_model.feature_names_
+    df_input = pd.DataFrame([user_input], columns=feature_names)
+    df_pool = Pool(df_input, cat_features=catboost_model.get_cat_feature_indices())
+
+    price = catboost_model.predict(df_input)
 
     st.success(f"prix estime: {price}")
