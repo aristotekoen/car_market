@@ -72,7 +72,40 @@ At this stage we get a dataframe with columns containing lists of mixed types or
 
 ![image](https://github.com/user-attachments/assets/c9024264-d3c8-49e3-b0cc-13e3abbdb62e)
 
-We see that the fields are formatted in various ways, some are grouped under dictionnaries with multiple keys.
+We see that the fields are formatted in various ways, some are grouped under dictionnaries with multiple keys, the price is stored as a string with a space between thousands and the EUR sign, mileage is a string with KM sign. That is what we will come to treat in the next section: cleaning and processing. 
+
+Before this however, we then used all the collected ids to scrape the ads one by one to obtain car characterstics which weren't present in the crawling on listing pages such as extras, interior types etc. This allowed us to enrich the features for each listing. 
+
+### 🧹 Cleaning and preprocessing:
+
+This data was very messy both in terms of the way it was stored and in terms of the types (no standard json type for each field within the api response meaning that each field needed to be treated with its own strategy and mixed types within various fields and floats stored as strings with both numbers and letters and special characters). The largest part of the project was spent on this stage and below are the various cleaning methods that we applied to this data.  
+
+#### Cleaning (cf. exploratory_analysis.ipynb): 
+
+✔️ Converted extras from a list of jsons each representing the presence of an extra to one boolean column per extra (example: air_conditioning: True or False)
+✔️ Converted specifications columns from a json with all specifications to one column per specification containing its respective values (example fuel_type: petrol)
+✔️ Converted model trim column transforming the dictionnary with all trim specs per listing to one column per trim spec (example one column doors: number of doors) for each listing
+✔️ Extract description and store it in one columns
+✔️ Deduplicated ads, some listings which were listed with paid priority would appear multiple times on the website so we had to keep only one listing per id
+✔️ We drop over 40 unnecessary columns (leasing, marketplace, seo, finance options etc.) 
+✔️ We process geolocation json to extract latitude longitude
+✔️ Convert mileage from a string of the form 15 000 KM to float using regex
+✔️ Extract battery charge time, fuel type, engine power, gearbox type, features, engine size, battery range from key feature dictionnaries
+✔️ Extract Brand, model, variant, registration year from dictionnary
+✔️ Convert engine size from 1200 cc/375kW/1000 W to float
+✔️ Convert dates to datetime
+✔️ Deduplicate redudant columns (some columns were redundant as extracted from different sections of the json)
+✔️ Remove columns with constant values for all listings
+✔️ Convert battery range from 400 km or 400 χλμ to a float via regex
+✔️ Convert battery charge time from 7 ωρες το an integer
+✔️ Translate from Greek to English, Map and Merge redundant category levels for multiple features (fuel type, gearbox_type, interior type, exterior color, interior color etc.). We encountered multiple features such as fuel type where the levels were stored both in English or in Greek within the same column. For example we would have some cars with fuel type Πετρελαιο and some with Diesel. We merged each level together for these columns. 
+✔️ Convert year column stored as double digit string in the form 00 for 2000 and 92 for 1992 to the 4 digit year
+✔️ Extract the information Μεταλλικο regarding exterior color to store it as a boolean feature is_metallic
+✔️ Convert emissions Co2 from 98 g/km to float
+✔️ Convert rim size from 17 inches or 17 ιντσες to integer.
+✔️ Fill missing co2 emission values for electric cars to 0
+✔️ Merge inconsistent category levels of body type (Bus with Van and van ) which all consered mini vans
+
 
 
 
