@@ -76,11 +76,10 @@ We see that the fields are formatted in various ways, some are grouped under dic
 
 Before this however, we then used all the collected ids to scrape the ads one by one to obtain car characterstics which weren't present in the crawling on listing pages such as extras, interior types etc. This allowed us to enrich the features for each listing. 
 
-### 🧹 Cleaning and preprocessing:
+### 🧹 Cleaning (cf. exploratory_analysis.ipynb):
 
 This data was very messy both in terms of the way it was stored and in terms of the types (no standard json type for each field within the api response meaning that each field needed to be treated with its own strategy and mixed types within various fields and floats stored as strings with both numbers and letters and special characters). The largest part of the project was spent on this stage and below are the various cleaning methods that we applied to this data.  
 
-#### Cleaning (cf. exploratory_analysis.ipynb): 
 
 ✔️ Extracted all possible extras in order to convert extras from a list of jsons each representing the mention of an extra to one boolean column per extra (example: air_conditioning: True or False)  
 ✔️ Extracted all possible specifications to convert specifications from one json with mentioned specifications to one column per specification containing their respective values (example fuel_type: petrol)  
@@ -105,11 +104,37 @@ This data was very messy both in terms of the way it was stored and in terms of 
 ✔️ Convert rim size from 17 inches or 17 ιντσες to integer.  
 ✔️ Fill missing co2 emission values for electric cars to 0  
 ✔️ Merge inconsistent category levels of body type (Bus with Van and van ) which all consered mini vans  
-✔️ Drop listings without a price
+✔️ Drop listings without a price  
 
-We obtain a tabular dataframe with  113877 listings and 145 columns.
+We obtain a tabular dataframe with  112944 listings and 145 columns.
 
-#### Preprocessing (cf. 
+### 📊 Exploratory Analysis (cf.5_exploratory_analysis_after_initial_clean.ipynb): 
+
+#### 1 - Missing values: 
+
+We notice some features with very low level of completion <50% such as vehicle dimensions, performance features such as torque, technical check up, battery related information and co2 emissions. Also, we see the extra features all with the same level of completion, this is because when the json containing extras was present we set to true the extras contained in it and to false the ones not mentionned. Therefore all extras are set to NaN for listings which did not contain a json with extras.
+
+![completude](https://github.com/user-attachments/assets/1682b5b6-d858-4eee-a2a9-d1e1a45549c2)
+
+#### 2 - Analysis of fields extracted from extras: 
+
+The json response from car ads contains a json with the mentioned extras in the car. We have 85 possible extras for each car, that is a very large number of features and we want to see if certain extras are really useful or present in the dataframe. 
+
+We notice that certain extras are almost never set to True such as foreign numbers, price without vat. We also see some extras that are almost always set to True such as abs. We notice extra:826 whith a non informative name, we will not include this in our dataset.
+
+![extras](https://github.com/user-attachments/assets/4403f98e-38df-4b18-9d38-d3793afb9194)
+
+
+The issue we face is that the number of extras is large making it tedious to analyze one by one and and we might ask ourselves if an extra that is rarely present or always present has an effect on the price of a car.  Below we plot the boxplots of car prices with respect to the presence of each extra or not. 
+
+What we see:
+* There are some very rare extras which can have significant effect on the price of a car (for example armored vehicle or air suspension). We did not perform hypothesis tests to ensure that the differences are statistically significant and we conclude visually at this stage. 
+* We can see that cars with extras often found in older cars such as cd player or (air conditioning (old) vs automatic air conditioning (newer)) tend to have a lower price
+* We see from the extra leasing that there are some cars posted for leasing and that their prices tend to be lower (this might be because the poster mentions the monthly payment value instead of the sale price)
+* We see that recent extras such as apple car play, start and stop, automatic parking, led lights have a significantly higher price
+
+![boxplot_extras](https://github.com/user-attachments/assets/869b8479-b682-49af-a6fe-1dfae5613b3b)
+
 
 
 
