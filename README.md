@@ -136,7 +136,125 @@ What we see:
 ![boxplot_extras](https://github.com/user-attachments/assets/869b8479-b682-49af-a6fe-1dfae5613b3b)
 
 
+#### 3 - Describe of main numerical variables:
 
+On the describe of the main numerical variables below we notice a high presence of outliers which led us to investigate these cases, it turns out that the dataset contains many abnormal ads:
+
+* raw prices of 1: User mention a price of 1 when they want to negotiate directly with the buyer without mentioning the price
+* raw prices of over one million euros: these are either mistakes when entering the price or super cars
+* 5% of the data has a price below 1800, this is because many users post ads as a car they are selling for spare parts. Multiple ads also concern a specific spare part being sold.
+* registration year in 2026 although we are in 2025
+* registration years from 1901: these are often antiques or anomalies
+* engine powers and sizes of 0 or 1 when the user doesn't know what to write.
+* engine sizes below 87cc: these concern some very rare vehicles sometimes with one seat or anomalies
+* Cars with 1 seat 
+
+|       |        raw_price |    mileage |   registration_year |   engine_size |   engine_power |         seats |         doors |
+|:------|-----------------:|-----------:|--------------------:|--------------:|---------------:|--------------:|--------------:|
+| count | 112944           | 112938     |        112944       |    112944     |    112944      | 112908        | 112938        |
+| mean  |  14954.4         | 137523     |          2011.54    |      1608.94  |       133.638  |      4.7345   |      4.45693  |
+| std   |  19725.4         |  94215.8   |             9.02256 |       661.385 |        83.9379 |      0.899407 |      0.972346 |
+| min   |      1           |      0     |          1901       |         0     |         0      |      1        |      2        |
+| 1%    |    100           |      0     |          1977       |        87     |         1      |      2        |      2        |
+| 5%    |   1800           |    260     |          1997       |       998     |        65      |      2        |      2        |
+| 10%   |   3000           |  25000     |          2001       |      1000     |        71      |      4        |      3        |
+| 25%   |   6000           |  78000     |          2007       |      1248     |        90      |      5        |      4        |
+| 50%   |  10500           | 129000     |          2014       |      1500     |       115      |      5        |      5        |
+| 75%   |  17000           | 185000     |          2018       |      1800     |       150      |      5        |      5        |
+| 90%   |  28300           | 249000     |          2020       |      2171     |       220      |      5        |      5        |
+| 95%   |  41000           | 290000     |          2022       |      2996     |       300      |      5        |      5        |
+| 99%   |  90000           | 400000     |          2024       |      4297     |       475.57   |      7        |      5        |
+| max   |      1.11111e+06 |      2e+06 |          2026       |     10000     |       999      |     11        |      7        |
+
+We see that we will need to apply some rules based on domain knowledge in order to fix some of these issues as well as maybe try an outlier removal technique in order to remove certain abnormal points. 
+
+#### 4 - Distribution of the target variable:
+
+Here we plot the histogram, box plot of our target variable:
+
+* We can see that when passing to the logarithm the data resembles more a symmetric bell curve. We will not suppose normality without a hypothesis test but what this tells us is that if we wish to remove outliers using a method like z score or interquartile range we should use the logarithm of this feature. 
+
+![price_boxplot](https://github.com/user-attachments/assets/227fbad7-43bf-495e-b139-6d96f5d1d53c)
+
+![image](https://github.com/user-attachments/assets/7fa20ec0-8721-4fa0-8491-678d763ff15f)
+
+
+#### 5 - Distribution of other numerical variables and comparison with logarithm:
+
+We can see that for the engine power and size there isn't a strong need to pass to the logarithm to suppress outliers. It would be detrimental regarding mileage.
+
+
+![mileage_dist_log_vs_no_log](https://github.com/user-attachments/assets/280c822d-b468-4e2f-9027-824a3f86c24e)
+![engine_power_dist_log_vs_no_log](https://github.com/user-attachments/assets/350e782f-fa2e-44ad-a6a4-18d241ea1bb1)
+![engine_size_dist_log_vs_no_log](https://github.com/user-attachments/assets/f4af4dc1-414b-429b-add0-72292771d8a7)
+![rim_size_dist_log_vs_no_log](https://github.com/user-attachments/assets/bd7ed51c-ad7f-4ed4-85e9-6bf6d02c0b64)
+
+
+#### 6 - Correlations and effects between variables: 
+
+If we look at distributions and relationships on the whole dataset we cannot see much. This is logical, we are having high end brands like bentleys and porsches mixed with budget brands such as Dacia or Renault. Therefore a Porsche with 150 000 km mileage might still be more expensive than a brand new Dacia. The same can be thought of within a brand, for Audis for example we will have high end models such the Q8 RS mixed with audi a1s. We can also think about the model year, some brands might release an upgraded car model from a year onwards. It is therefore important in our case to look at relationships within groups. There is a compromise to find however between the level of granularity of the groups. In fact if grouping by brand, model and year we might get groups with not enough points to draw reliable conclusions from.
+
+In fact if we look at the number of points per group at the level brand, model and year we can see that 90% of the groups have less than 24 points within them and we see that we get 11559 groups :
+
+|       |       count |
+|:------|------------:|
+| count | 11559       |
+| mean  |     9.72229 |
+| std   |    20.2159  |
+| min   |     1       |
+| 1%    |     1       |
+| 5%    |     1       |
+| 10%   |     1       |
+| 25%   |     1       |
+| 50%   |     3       |
+| 75%   |     9       |
+| 90%   |    24       |
+| 95%   |    43       |
+| 99%   |   100.84    |
+| max   |   279       |
+
+If we go down a level (brand and model), we have 1621 group and 75% the groups have less than 39 points
+
+|       |     count |
+|:------|----------:|
+| count | 1621      |
+| mean  |   69.3276 |
+| std   |  209.384  |
+| min   |    1      |
+| 1%    |    1      |
+| 5%    |    1      |
+| 10%   |    1      |
+| 25%   |    2      |
+| 50%   |    8      |
+| 75%   |   39      |
+| 90%   |  166      |
+| 95%   |  318      |
+| 99%   | 1028.2    |
+| max   | 2773      |
+
+If we look at a brand level we have 121 brands and 50% of the brands have less than 19 points:
+
+|       |    count |
+|:------|---------:|
+| count |  121     |
+| mean  |  933.421 |
+| std   | 2045.22  |
+| min   |    1     |
+| 1%    |    1     |
+| 5%    |    1     |
+| 10%   |    1     |
+| 25%   |    4     |
+| 50%   |   19     |
+| 75%   |  409     |
+| 90%   | 4426     |
+| 95%   | 6660     |
+| 99%   | 7723     |
+| max   | 9604     |
+
+In fact this shows us that we are dealing with critically important categorical features with high cardinality and a high level of sparsity. We will have some brands which are not present on the Greek market but which still exist and for which we have very few examples. Also, we see that we will have a few select brands under which most of the data is concentrated (Peugot, Fiat, Audis, Bmws, Mercedes etc.). This is something that we will have to keep in mind for the rest of this project. 
+
+
+Now let's focus on a brand (Mercedes which is the brand with the most data points)
 
 
 
