@@ -181,6 +181,7 @@ Here we plot the histogram, box plot of our target variable:
 
 #### 5 - Distribution of other numerical variables and comparison with logarithm:
 
+
 We can see that for the engine power and size there isn't a strong need to pass to the logarithm to suppress outliers. It would be detrimental regarding mileage.
 
 
@@ -189,72 +190,59 @@ We can see that for the engine power and size there isn't a strong need to pass 
 ![engine_size_dist_log_vs_no_log](https://github.com/user-attachments/assets/f4af4dc1-414b-429b-add0-72292771d8a7)
 ![rim_size_dist_log_vs_no_log](https://github.com/user-attachments/assets/bd7ed51c-ad7f-4ed4-85e9-6bf6d02c0b64)
 
+#### 6 - Correlations
 
-#### 6 - Correlations and effects between variables: 
+Below we plot the correlation matrix between the main numerical features in our dataframe. We observe:
 
-If we look at distributions and relationships on the whole dataset we cannot see much. This is logical, we are having high end brands like bentleys and porsches mixed with budget brands such as Dacia or Renault. Therefore a Porsche with 150 000 km mileage might still be more expensive than a brand new Dacia. The same can be thought of within a brand, for Audis for example we will have high end models such the Q8 RS mixed with audi a1s. We can also think about the model year, some brands might release an upgraded car model from a year onwards. It is therefore important in our case to look at relationships within groups. There is a compromise to find however between the level of granularity of the groups. In fact if grouping by brand, model and year we might get groups with not enough points to draw reliable conclusions from.
+* Positive correlations between price and: engine power, engine size and registration year
+* Negative correlations between the price and the mileage
+* An obviously high correlation between engine power and engine size.
+* Almost no correlation between price and number of doors and seats. This is strange as we might intuitively think that the higher number of seats, the larger the vehicle and therefore the higher the price.
+* A high correlation between number of doors and number of seats
 
-In fact if we look at the number of points per group at the level brand, model and year we can see that 90% of the groups have less than 24 points within them and we see that we get 11559 groups :
-
-|       |       count |
-|:------|------------:|
-| count | 11559       |
-| mean  |     9.72229 |
-| std   |    20.2159  |
-| min   |     1       |
-| 1%    |     1       |
-| 5%    |     1       |
-| 10%   |     1       |
-| 25%   |     1       |
-| 50%   |     3       |
-| 75%   |     9       |
-| 90%   |    24       |
-| 95%   |    43       |
-| 99%   |   100.84    |
-| max   |   279       |
-
-If we go down a level (brand and model), we have 1621 group and 75% the groups have less than 39 points
-
-|       |     count |
-|:------|----------:|
-| count | 1621      |
-| mean  |   69.3276 |
-| std   |  209.384  |
-| min   |    1      |
-| 1%    |    1      |
-| 5%    |    1      |
-| 10%   |    1      |
-| 25%   |    2      |
-| 50%   |    8      |
-| 75%   |   39      |
-| 90%   |  166      |
-| 95%   |  318      |
-| 99%   | 1028.2    |
-| max   | 2773      |
-
-If we look at a brand level we have 121 brands and 50% of the brands have less than 19 points:
-
-|       |    count |
-|:------|---------:|
-| count |  121     |
-| mean  |  933.421 |
-| std   | 2045.22  |
-| min   |    1     |
-| 1%    |    1     |
-| 5%    |    1     |
-| 10%   |    1     |
-| 25%   |    4     |
-| 50%   |   19     |
-| 75%   |  409     |
-| 90%   | 4426     |
-| 95%   | 6660     |
-| 99%   | 7723     |
-| max   | 9604     |
-
-In fact this shows us that we are dealing with critically important categorical features with high cardinality and a high level of sparsity. We will have some brands which are not present on the Greek market but which still exist and for which we have very few examples. Also, we see that we will have a few select brands under which most of the data is concentrated (Peugot, Fiat, Audis, Bmws, Mercedes etc.). This is something that we will have to keep in mind for the rest of this project. 
+![correlation](https://github.com/user-attachments/assets/355070d5-80f8-457f-82e1-81e255eee47d)
 
 
-Now let's focus on a brand (Mercedes which is the brand with the most data points)
+#### 7 -  Relationships between variables: 
+
+If we look at distributions and relationships on the whole dataset we cannot see much. This is logical, we are having high end brands like bentleys and porsches mixed with budget brands such as Dacia or Renault. Therefore a Porsche with 150 000 km mileage might still be more expensive than a brand new Dacia. The same can be thought of within a brand, for Audis for example we will have high end models such the Q8 RS mixed with audi a1s. We can also think about the model year, some brands might release an upgraded car model from a year onwards. As we can see this is clear when looking at the median prices per brand, model and year:
+
+![median_price_per_brand](https://github.com/user-attachments/assets/5084f118-f344-4032-8e86-a0b410f23d58)
+![median_price_per_audi_model](https://github.com/user-attachments/assets/a2271a85-4494-44af-be10-5117f355f5eb)
+![boxplot_per_year_price](https://github.com/user-attachments/assets/9975cf6a-8c0c-4dd7-812f-c0ba4e06ad0e)
+
+
+It is therefore important in our case to look at relationships within groups to gain valuable insights regarding the relationships between certain features, but also to clear outliers! We wouldn't want to clear outliers on the price on the whole dataset as this would remove high end cars and budget cars only. They have to be considered by group.
+
+There is a compromise to find however between the level of granularity of the groups. In fact when grouping by brand, model and year we might get groups with not enough points to draw reliable conclusions from.
+If we look at the number of points per group at the level brand, model and year we can see that 90% of the groups have less than 24 points within them and we see that we get 11559 groups. If we go down a level (brand and model), we have 1621 group and 75% the groups have less than 39 points. If we look at a brand level we have 121 brands and 50% of the brands have less than 19 points:
+
+|       |   brand_model_year_group_count |   brand_model_group_count |   brand_count |
+|:------|-------------------------------:|--------------------------:|--------------:|
+| count |                    11559       |                 1621      |       121     |
+| mean  |                        9.72229 |                   69.3276 |       933.421 |
+| std   |                       20.2159  |                  209.384  |      2045.22  |
+| min   |                        1       |                    1      |         1     |
+| 1%    |                        1       |                    1      |         1     |
+| 5%    |                        1       |                    1      |         1     |
+| 10%   |                        1       |                    1      |         1     |
+| 25%   |                        1       |                    2      |         4     |
+| 50%   |                        3       |                    8      |        19     |
+| 75%   |                        9       |                   39      |       409     |
+| 90%   |                       24       |                  166      |      4426     |
+| 95%   |                       43       |                  318      |      6660     |
+| 99%   |                      100.84    |                 1028.2    |      7723     |
+| max   |                      279       |                 2773      |      9604     |
+
+
+We understand that we are dealing with critically important categorical features with high cardinality and a high level of sparsity. There are some brands which are not present on the Greek market and for which we have very few examples. On the other hand, we have a few select brands under which most of the data is concentrated (Peugot, Fiat, Audis, Bmws, Mercedes etc.) This is something that we will have to keep in mind for the rest of this project. 
+
+![pct_listings_per_brand](https://github.com/user-attachments/assets/1cec9444-b65c-4c1b-984d-f393afc7482e)
+
+
+Now let's focus on a brand (Mercedes which is the brand with the most data points):
+
+
 
 
 
