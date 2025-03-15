@@ -82,29 +82,34 @@ This data was very messy both in terms of the way it was stored and in terms of 
 
 #### Cleaning (cf. exploratory_analysis.ipynb): 
 
-✔️ Converted extras from a list of jsons each representing the presence of an extra to one boolean column per extra (example: air_conditioning: True or False)
-✔️ Converted specifications columns from a json with all specifications to one column per specification containing its respective values (example fuel_type: petrol)
-✔️ Converted model trim column transforming the dictionnary with all trim specs per listing to one column per trim spec (example one column doors: number of doors) for each listing
-✔️ Extract description and store it in one columns
-✔️ Deduplicated ads, some listings which were listed with paid priority would appear multiple times on the website so we had to keep only one listing per id
-✔️ We drop over 40 unnecessary columns (leasing, marketplace, seo, finance options etc.) 
-✔️ We process geolocation json to extract latitude longitude
-✔️ Convert mileage from a string of the form 15 000 KM to float using regex
-✔️ Extract battery charge time, fuel type, engine power, gearbox type, features, engine size, battery range from key feature dictionnaries
-✔️ Extract Brand, model, variant, registration year from dictionnary
-✔️ Convert engine size from 1200 cc/375kW/1000 W to float
-✔️ Convert dates to datetime
-✔️ Deduplicate redudant columns (some columns were redundant as extracted from different sections of the json)
-✔️ Remove columns with constant values for all listings
-✔️ Convert battery range from 400 km or 400 χλμ to a float via regex
-✔️ Convert battery charge time from 7 ωρες το an integer
-✔️ Translate from Greek to English, Map and Merge redundant category levels for multiple features (fuel type, gearbox_type, interior type, exterior color, interior color etc.). We encountered multiple features such as fuel type where the levels were stored both in English or in Greek within the same column. For example we would have some cars with fuel type Πετρελαιο and some with Diesel. We merged each level together for these columns. 
-✔️ Convert year column stored as double digit string in the form 00 for 2000 and 92 for 1992 to the 4 digit year
-✔️ Extract the information Μεταλλικο regarding exterior color to store it as a boolean feature is_metallic
-✔️ Convert emissions Co2 from 98 g/km to float
-✔️ Convert rim size from 17 inches or 17 ιντσες to integer.
-✔️ Fill missing co2 emission values for electric cars to 0
-✔️ Merge inconsistent category levels of body type (Bus with Van and van ) which all consered mini vans
+✔️ Extracted all possible extras in order to convert extras from a list of jsons each representing the mention of an extra to one boolean column per extra (example: air_conditioning: True or False)  
+✔️ Extracted all possible specifications to convert specifications from one json with mentioned specifications to one column per specification containing their respective values (example fuel_type: petrol)  
+✔️ Extracted all possible trim levels to convert model trim column from a json with mentioned trim specs to one column per trim spec (example one column doors: number of doors) for each listing  
+✔️ Extract description and store it in one columns  
+✔️ Deduplicated ads, some listings which were listed with paid priority would appear multiple times on the website so we had to keep only one listing per id  
+✔️ We drop over 40 unnecessary columns (leasing, marketplace, seo, finance options etc.)   
+✔️ We process geolocation json to extract latitude longitude  
+✔️ Convert mileage from a string of the form 15 000 KM to float using regex  
+✔️ Extract battery charge time, fuel type, engine power, gearbox type, features, engine size, battery range from key feature dictionnaries  
+✔️ Extract Brand, model, variant, registration year from dictionnary  
+✔️ Convert engine size from 1200 cc/375kW/1000 W to float  
+✔️ Convert dates to datetime  
+✔️ Deduplicate redudant columns (some columns were redundant as extracted from different sections of the json)  
+✔️ Remove columns with constant values for all listings  
+✔️ Convert battery range from 400 km or 400 χλμ to a float via regex  
+✔️ Convert battery charge time from 7 ωρες το an integer  
+✔️ Translate from Greek to English, Map and Merge redundant category levels for multiple features (fuel type, gearbox_type, interior type, exterior color, interior color etc.). We encountered multiple features such as fuel type where the levels were stored both in English or in Greek within the same column. For example we would have some cars with fuel type Πετρελαιο and some with Diesel. We merged each level together for these columns.   
+✔️ Convert year column stored as double digit string in the form 00 for 2000 and 92 for 1992 to the 4 digit year  
+✔️ Extract the information Μεταλλικο regarding exterior color to store it as a boolean feature is_metallic  
+✔️ Convert emissions Co2 from 98 g/km to float  
+✔️ Convert rim size from 17 inches or 17 ιντσες to integer.  
+✔️ Fill missing co2 emission values for electric cars to 0  
+✔️ Merge inconsistent category levels of body type (Bus with Van and van ) which all consered mini vans  
+✔️ Drop listings without a price
+
+We obtain a tabular dataframe with  113877 listings and 145 columns.
+
+#### Preprocessing (cf. 
 
 
 
