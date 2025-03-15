@@ -240,9 +240,13 @@ We understand that we are dealing with critically important categorical features
 ![pct_listings_per_brand](https://github.com/user-attachments/assets/1cec9444-b65c-4c1b-984d-f393afc7482e)
 
 
-Now let's focus on a brand (Mercedes which is the brand with the most data points):
+Now we showcase this by choosing one brand: BMW which is one of the most present brands in the dataset and which offers a wide range of models from budget to high end models. We only visualise three models (X1, X5, M8) one lower end model, one mid range model and one high end model. We only keep cars from 2015 and later. We can clearly see three separate distributions for each model if we look at the log of the raw price with respect to other features. And we see that for each model there is a linear relationship between the log of the raw price and the mileage, between the log of the price and the registration year. 
 
+We also see at the brand level, a linear relationship between  the log of the price and the engine power and engine size.
 
+![pairplot_for_bmw_and_3_model](https://github.com/user-attachments/assets/307a0d20-d5b0-476c-be58-0305fd4d0f66)
 
+If we plot the pairplot by fixing the model to the bmw 116 and look at three distant year models 2005, 2012 and 2020, we also see 3 distinct price distributions. So it is important to be careful when grouping listings together. Again if suppressing outliers on groups, if we grouped the listings by brand and model we might end up suppressing only cars from 2005 and all cars from 2020.
 
+![pairplot_for_bmw_and_3_years](https://github.com/user-attachments/assets/d2df3b71-7af1-40ef-a05d-4a7089286116)
 
