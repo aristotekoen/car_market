@@ -7,17 +7,17 @@ from catboost import Pool, CatBoostRegressor
 from google.cloud import storage
 from const import *
 
-@st.cache_resource
-def load_model():
+@st.cache_resource(show_spinner=False)
+def load_model(name):
     client = storage.Client()
     bucket = client.get_bucket('price-estimation')
-    blob = bucket.blob('models/catboost_all_extras.cbm')
-    model_name = 'catboost_all_extras.cbm'
+    blob = bucket.blob(f'models/catboost_{name}.cbm')
+    model_name = f'catboost_{name}.cbm'
     blob.download_to_filename(model_name)
     cb = CatBoostRegressor().load_model(model_name)
     return cb
 
-@st.cache_data
+@st.cache_data(show_spinner=False)
 def load_car_dictionnary():
     client = storage.Client()
     bucket = client.get_bucket('price-estimation')
@@ -31,6 +31,18 @@ def load_car_dictionnary():
 def create_dict_for_pred(model):
     return {k: np.nan for k in model.feature_names_}
 
+def predict_price(df, q1, q2, q3):
+    price_q1 = q1.predict(df)[0]
+    price_q2 = q2.predict(df)[0]
+    price_q3 = q3.predict(df)[0]
+
+    if price_q3 <= price_q1:
+        return price_q3 , (price_q1 + price_q3)/2, price_q1
+    if (price_q1 >= price_q2) or (price_q2 >= price_q3):
+        return price_q1,  (price_q3 + price_q1)/2, price_q3
+
+
+    return price_q1, price_q2, price_q3
 
 
 cars_dict = load_car_dictionnary()
@@ -60,45 +72,24 @@ st.header('ℹ️ Basic Information')
 
 mileage = float(st.number_input("Mileage in km", value=10000))
 registration_year = float(st.number_input("Registration year", min_value=2000, max_value=2025, format="%d"))
-registration_month = st.slider("Registration month", min_value=1, max_value=12, step=1)
-fuel_type = st.selectbox("Fuel type", fuel_types)
-gearbox_type = st.selectbox("Gearbox type", gearbox_types)
+fuel_type = st.selectbox("Fuel type", fuel_types, index=len(fuel_types)-1)
+gearbox_type = st.selectbox("Gearbox type", gearbox_types, index=1)
 seats = float(st.slider("Number of seats", min_value=1, max_value=10, format="%d", value=5))
 doors = float(st.number_input("Number of doors", min_value=1, max_value=10, format="%d", value=5))
-rim_size = float(st.number_input("Rim size (inches)?", min_value=10, max_value=30, help="If  unknown leave empty, values should be between 10 and 30 inches"))
-number_of_gears = float(st.number_input("Number of gears?", min_value=2, max_value=10, step=1, format="%d", help="If unknown leave as is"))
-drive_type = st.selectbox("Drive type", drive_types, help="If unknown leave as is")
+rim_size = float(st.number_input("Rim size (inches)?", min_value=10, max_value=30, help="Size of the wheel rims"))
+drive_type = st.selectbox("Drive type", drive_types, help="FWD: Front Wheel Drive, RWD: Rear Wheel Drive, AWD: All Wheel Drive, 4WD: four wheel drive")
 number_plate_ending = st.selectbox("Number of plate endings", number_plate_endings)
 
-st.header('⚙️ Engine Information and performance')
+st.header('⚙️ Engine Information')
 
 engine_size = float(st.number_input("Engine size in cc", value=1000))
 engine_power = float(st.number_input("Engine power in bhp", value=100))
-top_speed = float(st.number_input("Top Speed? (Km/h)", min_value=100, max_value=400, help="If unknown leave as is"))
-torque = float(st.number_input("Torque? (N.m)", min_value=70, max_value=900, help="If unknown leave as is"))
-acceleration = float(st.number_input("Acceleration? (seconds 0-100km/h)", min_value=1, max_value=40, step=1, help="If unknown leave as is"))
-
-st.header('🌱 Efficiency')
-
-fuel_consumption = st.number_input("Fuel consumption? L/100km", min_value=0, max_value=50, help="If unknown leave as is")
-battery_charge_time = float(st.slider("Battery charge time?", min_value=1, max_value=10, step=1, help="If not applicable leave as is"))
-co2_emissions = float(st.number_input("CO2 emissions (g/km)", value=100))
-
-st.header('📐 Vehicle dimensions')
-
-vehicle_height = float(st.number_input("Vehicle height in mm", min_value= 800, max_value=2500, help="If unknown leave as is" ))
-vehicle_width = float(st.number_input("Vehicle Width? (mm)", min_value=1000, max_value=3000, help="If unknown leave as is"))
-vehicle_length = float(st.number_input("Vehicle length? (mm)", min_value=2500, max_value=7000, help="If unknown leave as is"))
-wheel_base = float(st.number_input("Wheelbase? (mm)", min_value=1500, max_value=4000, help="If unknown leave as is"))
-gross_weight = float(st.number_input("Gross Weight? (kg)", min_value=980, max_value=3500, help="If unknown leave as is"))
 
 
 st.header('🔧 Vehicle condition and last technical check up')
 is_new = st.selectbox("Is your car new?", [True, False], index=1)
 crashed = st.selectbox("Is the vehicle sold crashed?", [True, False], index=1)
 never_crashed = st.selectbox("Was the vehicle crashed in the past?", [True, False], index=1)
-kteo_month = st.slider("Last technical check up month (KTEO)", step=1, min_value=1, max_value=12, format="%d", help="If not applicable leave as is")
-kteo_year = st.slider("Last technical check up year (KTEO)", step=1,  min_value=2000, max_value=2025, format="%d", help="If not applicable leave as is")
 
 st.header('🎨 Colors and interior material')
 exterior_color = st.selectbox("Exterior color", exterior_colors)
@@ -118,57 +109,55 @@ with st.expander('✨ Select Extra Features', expanded=False):
         extras[option] = st.checkbox(label)
 
 st.header("🔮 Ready to estimate the price of your car?")
-if st.button("Predict car price"):
 
-    user_input = {'lat': lat,
- 'lon': longitude,
- 'is_new': is_new,
- 'mileage': mileage,
- 'crashed': crashed,
- 'engine_size': engine_size,
- 'registration_month': registration_month,
- 'registration_year': registration_year,
- 'engine_power': engine_power,
- 'fuel_type': fuel_type,
- 'gearbox_type': gearbox_type,
- 'brand': brand,
- 'model': model,
- 'never_crashed': never_crashed
-                  }
+st.write("")
+if st.button("Predict car price", use_container_width=True):
+    with st.spinner("Estimating car price..."):
+        user_input = {'lat': lat,
+     'lon': longitude,
+     'is_new': is_new,
+     'mileage': mileage,
+     'crashed': crashed,
+     'engine_size': engine_size,
+     'registration_year': registration_year,
+     'engine_power': engine_power,
+     'fuel_type': fuel_type,
+     'gearbox_type': gearbox_type,
+     'brand': brand,
+     'model': model,
+     'never_crashed': never_crashed
+                      }
 
-    user_input.update(extras)
+        user_input.update(extras)
 
-    rest_dict = {
- 'interior_type': interior_type,
- 'seats': seats,
- 'kteo': str(kteo_month) + "/" + str(kteo_year),
- 'exterior_color': exterior_color,
- 'number_plate_ending': number_plate_ending,
- 'emissions_co2': co2_emissions,
- 'battery_charge_time': battery_charge_time,
- 'interior_color': interior_color,
- 'rim_size': rim_size,
- 'vehicle_height': vehicle_height,
- 'number_of_gears': number_of_gears,
- 'torque': torque,
- 'gross_weight': gross_weight,
- 'acceleration': acceleration,
- 'vehicle_width': vehicle_width,
- 'body_type': body_type,
- 'vehicle_length': vehicle_length,
- 'top_speed': top_speed,
- 'wheelbase': wheel_base,
- 'fuel_consumption': fuel_consumption,
- 'drive_type': drive_type,
- 'doors': doors,
- 'is_metallic': is_metallic}
+        rest_dict = {
+     'interior_type': interior_type,
+     'seats': seats,
+     'exterior_color': exterior_color,
+     'number_plate_ending': number_plate_ending,
+     'interior_color': interior_color,
+     'rim_size': rim_size,
+     'body_type': body_type,
+     'drive_type': drive_type,
+     'doors': doors,
+     'is_metallic': is_metallic}
 
-    user_input.update(rest_dict)
-    catboost_model = load_model()
-    feature_names = catboost_model.feature_names_
-    df_input = pd.DataFrame([user_input], columns=feature_names)
-    df_pool = Pool(df_input, cat_features=catboost_model.get_cat_feature_indices())
+        user_input.update(rest_dict)
 
-    price = catboost_model.predict(df_input)
 
-    st.success(f"prix estime: {price}")
+        catboost_model = load_model('q2')
+        catboost_model_1 = load_model('q1')
+        catboost_model_3 = load_model('q3')
+
+        feature_names = catboost_model.feature_names_
+        df_input = pd.DataFrame([user_input], columns=feature_names)
+        df_pool = Pool(df_input, cat_features=catboost_model.get_cat_feature_indices())
+
+        price_q1, price_q2, price_q3 = predict_price(df_pool, catboost_model_1, catboost_model, catboost_model_3)
+
+
+        col1, col2, col3 = st.columns(3)
+
+        col1.metric(f"Estimated Low Price", value=f"{int(price_q1)} €")
+        col2.metric(f"Estimated Price",value=f"{int(price_q2)} €")
+        col3.metric(f"Estimated High Price", value=f"{int(price_q3)} €")

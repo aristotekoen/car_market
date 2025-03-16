@@ -1,3 +1,5 @@
+from time import monotonic
+
 import numpy as np
 import optuna
 import pandas as pd
@@ -5,8 +7,8 @@ from catboost import CatBoostRegressor, Pool
 from google.cloud import storage
 from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error
 from sklearn.model_selection import ShuffleSplit
-
 from const import low_importances
+from sklearn.preprocessing import MinMaxScaler
 
 
 def load_train_test():
@@ -17,6 +19,7 @@ def load_train_test():
     bucket = client.get_bucket('price-estimation')
     blob_train = bucket.get_blob('data/train_test_sets/train_02032024.csv')
     blob_test = bucket.get_blob('data/train_test_sets/test_02032024.csv')
+
     train_name = "train_02032024.csv"
     test_name = "test_02032024.csv"
     blob_train.download_to_filename(train_name)
@@ -41,7 +44,7 @@ def save_results(df, results_name):
     df.to_csv(path)
     client = storage.Client()
     bucket = client.get_bucket('price-estimation')
-    blob = bucket.blob(f'data/results/{results_name}.csv')
+    blob = bucket.blob(f'data/results/{results_name}')
     blob.upload_from_filename(path)
     print(f"Results {results_name} saved")
 
@@ -50,7 +53,7 @@ def save_processed_set(df, df_name):
     df.to_csv(path)
     client = storage.Client()
     bucket = client.get_bucket('price-estimation')
-    blob = bucket.blob(f'data/train_test_sets/{df_name}.csv')
+    blob = bucket.blob(f'data/train_test_sets/{df_name}')
     blob.upload_from_filename(path)
     print(f"Results {df_name} saved")
 
@@ -71,7 +74,7 @@ def process_types(data_set):
   data_set['acceleration'] = data_set['acceleration'].astype(str).str.replace(',','.').astype(float)
   return data_set
 
-def get_train_val_test_pools(train, test):
+def get_train_val_test_pools(train, test, strategy):
   print(f"Creating train val test pools")
   print(f"Train shape: {train.shape}")
   print(f"Test shape: {test.shape}")
@@ -85,8 +88,12 @@ def get_train_val_test_pools(train, test):
   X_test.iloc[:, categorical_features] = X_test.iloc[:, categorical_features].fillna("nan")
   train_pool = Pool(data=X_train, label=y_train, cat_features=categorical_features)
   test_pool = Pool(data=X_test, label=y_test, cat_features=categorical_features)
+
+
   print(f"Train pool shape: {train_pool.shape}")
   print(f"Test pool shape: {test_pool.shape}")
+
+
   return train_pool, test_pool, y_train, y_test
 
 def detect_outlier_on_groups(df, features, group_cols):
@@ -226,7 +233,7 @@ def preprocess_train_test(train, test, strategy):
         save_processed_set(train, f"processed_train_set_{strategy.upper()}.csv")
         save_processed_set(test, f"processed_test_set_{strategy.upper()}.csv")
 
-    if strategy == "drop_unpractical":
+    if strategy in "drop_unpractical":
         rm_columns = ['kteo', 'emissions_co2', 'battery_charge_time', 'vehicle_width', 'vehicle_height', 'vehicle_length',
                       'wheelbase', 'torque', 'acceleration', 'number_of_gears', 'gross_weight','top_speed', 'fuel_consumption','registration_month']
         option_columns = [x for x in train.columns if "option" in x]
@@ -258,8 +265,11 @@ def preprocess_train_test(train, test, strategy):
 def train_model(train, test, strategy):
     print(f"Training model for strategy {strategy}")
     train_processed, test_processed = preprocess_train_test(train, test, strategy)
+    monotonic_constraints = {'is_metallic':1,'crashed':-1, 'is_new':1}
+    monotonic_constraints.update({x: 1 for x in train_processed.columns.tolist() if 'extra' in x})
 
     def objective(trial):
+        print('Using common params')
         params = {
             "iterations": trial.suggest_int("iterations", 15000, 15000),
             # We set a high number of iterations as we will let the overfitting detector stop the training
@@ -269,10 +279,10 @@ def train_model(train, test, strategy):
             "l2_leaf_reg": trial.suggest_float("l2_leaf_reg", 0.01, 10, log=True),
             "bagging_temperature": trial.suggest_float("bagging_temperature", 0.0, 1.0),
             "random_strength": trial.suggest_float("random_strength", 0.0, 1.0),
-            "loss_function": trial.suggest_categorical("loss_function", ["Quantile:alpha=0.5"]),
+            "loss_function": trial.suggest_categorical("loss_function", ["RMSE","Quantile:alpha=0.5"]),
             "nan_mode": trial.suggest_categorical('nan_mode', ["Max"]),
-            "task_type": "GPU",
-            "grow_policy": trial.suggest_categorical("grow_policy",["Depthwise"])
+            "task_type": trial.suggest_categorical("task_type",["GPU"]),
+            "grow_policy": trial.suggest_categorical("grow_policy",["Depthwise","Lossguide"])
         }
         print(f"Launching 4 fold cv for strategy {strategy}")
         # cv_results = cv(train_pool, params = params, fold_count=4, verbose=True, early_stopping_rounds=50)
@@ -285,7 +295,7 @@ def train_model(train, test, strategy):
             train_fold = train_processed.iloc[train_index]
             val_fold = train_processed.iloc[val_index]
 
-            train_fold_pool, val_fold_pool, y_train_fold, y_val_fold = get_train_val_test_pools(train_fold, val_fold)
+            train_fold_pool, val_fold_pool, y_train_fold, y_val_fold = get_train_val_test_pools(train_fold, val_fold, strategy)
             print(params)
             model = CatBoostRegressor(**params)
             model.fit(train_fold_pool, eval_set=val_fold_pool, early_stopping_rounds=50, verbose=50)
@@ -310,8 +320,8 @@ def train_model(train, test, strategy):
     best_iteration = best_trial.user_attrs["best_iteration"]
     best_params["iterations"] = best_iteration
 
-    final_model = CatBoostRegressor(**best_params, task_type="GPU")
-    train_pool, test_pool, y_train, y_test = get_train_val_test_pools(train_processed, test_processed)
+    final_model = CatBoostRegressor(**best_params)
+    train_pool, test_pool, y_train, y_test = get_train_val_test_pools(train_processed, test_processed,strategy)
     final_model.fit(train_pool, verbose=50)
 
     y_pred = final_model.predict(test_pool)
@@ -333,6 +343,7 @@ def train_model(train, test, strategy):
     #results.to_csv(f"/content/drive/MyDrive/car_estimation/results_{strategy}.csv", index=False)
     return results, final_model, best_params
 
+
 def launch_training():
   train, test = load_train_test()
   print(f"Train shape: {train.shape}")
@@ -340,10 +351,58 @@ def launch_training():
   #train_model(train, test, "remove_outliers")
   #train_model(train, test, "drop_extras_and_options")
   #train_model(train,test,"drop_low_importance")
-  #train_model(train, test, "all_extras")
+  train_model(train, test, "all_extras")
   #train_model(train, test, "options")
-  train_model(train,test,"impute_missing_values")
-  train_model(train, test, "drop_unpractical")
+  #train_model(train,test,"impute_missing_values")
+
+def train_final_models():
+    print('Creating training set...')
+    train, test = load_train_test()
+    #train_all = pd.concat([train, test], axis=0)
+    params = {'random_strength': 0.01199857498,
+ 'verbose': 50,
+ 'iterations': 11333,
+ 'nan_mode': 'Max',
+ 'bagging_temperature': 0.8319957516,
+ 'grow_policy': 'Depthwise',
+ 'l2_leaf_reg': 0.6747582331,
+ 'task_type': 'GPU',
+ 'depth': 9,
+ 'min_data_in_leaf': 92,
+ 'learning_rate': 0.02721930604}
+    print(f"Parameters for training will be {params}")
+
+    print("preprocessing training set")
+    train_all_processed, test_processed = preprocess_train_test(train, test, "drop_unpractical")
+
+    print("Initialising models")
+    model_q1 = CatBoostRegressor(**params, loss_function='Quantile:alpha=0.25')
+    model_q2 = CatBoostRegressor(**params, loss_function='Quantile:alpha=0.5')
+    model_q3 = CatBoostRegressor(**params, loss_function='Quantile:alpha=0.75')
+
+
+    print("Getting training pool for training")
+    train_pool, _, y_train_all, _ = get_train_val_test_pools(train_all_processed, test_processed, "drop_unpractical")
+
+    print("Training model q1")
+    model_q1.fit(train_pool, verbose=50)
+
+    print("Training model q2")
+    model_q2.fit(train_pool, verbose=50)
+
+    print("Training model q3")
+    model_q3.fit(train_pool, verbose=50)
+
+    print('Saving models')
+
+    save_model(model_q1, "catboost_q1")
+    save_model(model_q2, "catboost_q2")
+    save_model(model_q3, "catboost_q3")
+
+
+
+
+
 
 if __name__ == "__main__":
-    launch_training()
+    train_final_models()
