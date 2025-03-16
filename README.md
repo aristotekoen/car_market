@@ -242,16 +242,18 @@ If we look at the number of points per group at the level brand, model and year 
 
 We understand that we are dealing with critically important categorical features with high cardinality and a high level of sparsity. There are some brands which are not present on the Greek market and for which we have very few examples. On the other hand, we have a few select brands under which most of the data is concentrated (Peugot, Fiat, Audis, Bmws, Mercedes etc.) This is something that we will have to keep in mind for the rest of this project. 
 
-![pct_listings_per_brand](https://github.com/user-attachments/assets/1cec9444-b65c-4c1b-984d-f393afc7482e)
-
+![pct_listings_per_brand](https://github.com/user-attachments/assets/1cec9444-b65c-4c1b-984d-f393afc7482e)  
 
 Now we showcase this by choosing one brand: BMW which is one of the most present brands in the dataset and which offers a wide range of models from budget to high end models. We only visualise three models (X1, X5, M8) one lower end model, one mid range model and one high end model. We only keep cars from 2015 and later. We can clearly see three separate distributions for each model if we look at the log of the raw price with respect to other features. And we see that for each model there is a linear relationship between the log of the raw price and the mileage, between the log of the price and the registration year. 
 
 We also see at the brand level, a linear relationship between  the log of the price and the engine power and engine size.
 
-![pairplot_for_bmw_and_3_model](https://github.com/user-attachments/assets/307a0d20-d5b0-476c-be58-0305fd4d0f66)
+![pairplot_for_bmw_and_3_model](https://github.com/user-attachments/assets/307a0d20-d5b0-476c-be58-0305fd4d0f66)  
 
 If we plot the pairplot by fixing the model to the bmw 116 and look at three distant year models 2005, 2012 and 2020, we also see 3 distinct price distributions. So it is important to be careful when grouping listings together. Again if suppressing outliers on groups, if we grouped the listings by brand and model we might end up suppressing only cars from 2005 and all cars from 2020.
+
+![pairplot_for_bmw_and_3_years](https://github.com/user-attachments/assets/d2df3b71-7af1-40ef-a05d-4a7089286116)
+
 
 ### Processing
 
@@ -268,7 +270,7 @@ Now thout we gained some insights on our data and identified abnormalities we ca
 * We removed extras which are always set to False or with a percentage of Trues lower than 3.5% (except for armored car and wheelchair which we judge informative in terms of domain knowledge)
 * We removed other extras displaying low correlations and which don't seem informative such as 'extra_greek_dealership','extra_imported','extra_exchange_with_bike','extra_credit_card_accepted','extra_acc','extra_nonsmoker' etc.
 
-Now considering the large number of extras, my question was if there was a way to simplify the dataset and reduce the dimension of the feature space. I grouped the extras in 4 categories:  
+Now considering the large number of extras, my question was if there was a way to simplify the dataset and reduce the dimension of the feature space. I grouped the extras in 6 categories:  
 
 1 - Comfort
 2 - Infotainement connecitivty
@@ -277,14 +279,10 @@ Now considering the large number of extras, my question was if there was a way t
 5 - Utility (wheelchair, hitch, service book)
 6 - Premium (armored, air suspension etc)
 
-Then for each listing I assigned a score for each category equal to the percentage of True values within the category:
+Then for each listing $x$ I created a simple option score $S_o$ between 0 and 1 for each category equal to the percentage of True values within the category:
 
-'''math
-\sum
-'''
+$S_o (x) = \frac{1}{d_{c}}\sum_{i=1}^{d_{c}} \mathbb{1}_{x_i=1}(x_i)$ where  $d_c$  is the number of extras within the category
 
 
 
-
-![pairplot_for_bmw_and_3_years](https://github.com/user-attachments/assets/d2df3b71-7af1-40ef-a05d-4a7089286116)
 
