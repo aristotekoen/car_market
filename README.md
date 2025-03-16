@@ -269,6 +269,7 @@ Now thout we gained some insights on our data and identified abnormalities we ca
 * If there are listings with crashed set to  True and never_crashed set to True this is a contradiction so we correct the values of never crashed to False
 * We removed extras which are always set to False or with a percentage of Trues lower than 3.5% (except for armored car and wheelchair which we judge informative in terms of domain knowledge)
 * We removed other extras displaying low correlations and which don't seem informative such as 'extra_greek_dealership','extra_imported','extra_exchange_with_bike','extra_credit_card_accepted','extra_acc','extra_nonsmoker' etc.
+* We removed listings with nans on doors and seats as they represented less than 10 listings.
 
 Now considering the large number of extras, my question was if there was a way to simplify the dataset and reduce the dimension of the feature space. I grouped the extras in 6 categories:  
 
