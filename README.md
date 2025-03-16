@@ -202,6 +202,11 @@ Below we plot the correlation matrix between the main numerical features in our 
 
 ![correlation](https://github.com/user-attachments/assets/355070d5-80f8-457f-82e1-81e255eee47d)
 
+Here we plot the correlations between the price and the presence of an extra in a car, we observe multiple extras with a null correlation such as exchange with bike which even intuitively don't seem impactful on the price. We also see some positivetly correlated extras which are either premium features( panormaic roof, heated seats, air suspension) or extras which are correlated with the registration year (apple car play, parktronic, automatic parking, eco start stop, lane assist) which are representative of newer models. As a result it will be useful to remove extras with low correlations or not directly impacting the price of a car. 
+
+![extra_corr](https://github.com/user-attachments/assets/850fdb73-086f-4913-8959-0d620e999730)
+
+
 
 #### 7 -  Relationships between variables: 
 
@@ -247,6 +252,39 @@ We also see at the brand level, a linear relationship between  the log of the pr
 ![pairplot_for_bmw_and_3_model](https://github.com/user-attachments/assets/307a0d20-d5b0-476c-be58-0305fd4d0f66)
 
 If we plot the pairplot by fixing the model to the bmw 116 and look at three distant year models 2005, 2012 and 2020, we also see 3 distinct price distributions. So it is important to be careful when grouping listings together. Again if suppressing outliers on groups, if we grouped the listings by brand and model we might end up suppressing only cars from 2005 and all cars from 2020.
+
+### Processing
+
+Now thout we gained some insights on our data and identified abnormalities we can process the data further. The following processing was applied to the data:
+
+* Remove missing model names
+* Only keep registration years above 2000 (this was chosen based on domain knowledge and based on what we want to achieve i.e: estimate the price of common used cars on the market)
+* Remove registration years equal to 2026
+* Remove antiques
+* Remove prices below 500 euros: we consider these points abnormal based on domain knowledge and if needed will apply further outlier removal strategies later. We also saw some car listings with prices of 50 meaning 50 000 in the data so this helps remove these cases
+* Remove prices above 350 000 euros
+* Remove listings with leasing set to true
+* If there are listings with crashed set to  True and never_crashed set to True this is a contradiction so we correct the values of never crashed to False
+* We removed extras which are always set to False or with a percentage of Trues lower than 3.5% (except for armored car and wheelchair which we judge informative in terms of domain knowledge)
+* We removed other extras displaying low correlations and which don't seem informative such as 'extra_greek_dealership','extra_imported','extra_exchange_with_bike','extra_credit_card_accepted','extra_acc','extra_nonsmoker' etc.
+
+Now considering the large number of extras, my question was if there was a way to simplify the dataset and reduce the dimension of the feature space. I grouped the extras in 4 categories:  
+
+1 - Comfort
+2 - Infotainement connecitivty
+3 - Safety and Driver Assistance 
+4 - Performance 
+5 - Utility (wheelchair, hitch, service book)
+6 - Premium (armored, air suspension etc)
+
+Then for each listing I assigned a score for each category equal to the percentage of True values within the category:
+
+'''math
+\sum
+'''
+
+
+
 
 ![pairplot_for_bmw_and_3_years](https://github.com/user-attachments/assets/d2df3b71-7af1-40ef-a05d-4a7089286116)
 
