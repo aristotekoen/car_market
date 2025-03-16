@@ -250,7 +250,7 @@ We also see at the brand level, a linear relationship between  the log of the pr
 
 ![pairplot_for_bmw_and_3_model](https://github.com/user-attachments/assets/307a0d20-d5b0-476c-be58-0305fd4d0f66)  
 
-If we plot the pairplot by fixing the model to the bmw 116 and look at three distant year models 2005, 2012 and 2020, we also see 3 distinct price distributions. So it is important to be careful when grouping listings together. Again if suppressing outliers on groups, if we grouped the listings by brand and model we might end up suppressing only cars from 2005 and all cars from 2020.
+If we plot the pairplot by fixing the model to the bmw 116 and look at three distant year models 2005, 2012 and 2020, we also see 3 distinct price distributions. For the same mileage we see that the newer model the higher the price is. This reinforces the importance of considering groups of listings on these features when we wish to process data or to fit certain models. Again if we suppressed outliers without grouping, we could end up suppressing only old cars and new cars.
 
 ![pairplot_for_bmw_and_3_years](https://github.com/user-attachments/assets/d2df3b71-7af1-40ef-a05d-4a7089286116)
 
