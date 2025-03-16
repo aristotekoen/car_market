@@ -301,7 +301,7 @@ Through this project we focused on three main modelling techniques:
 * An improvement on the base model consisting in fitting on linear regression per group and using the respective fitted regression to predict the value of the car
 * Gradient boosting, using catboost which is ideal for tabular data with high cardinality categorical features and missing values
 
-We noticed a significatively higher performance from catboost and therefore tried multiple different preprocessing techniques in order to find the optimal setting.
+We noticed a significatively higher performance from catboost and therefore tried multiple different preprocessing techniques in order to find the most accurate method.
 
 
 
