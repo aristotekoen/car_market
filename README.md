@@ -283,6 +283,14 @@ Then for each listing $x$ I created a simple option score $S_o$ between 0 and 1 
 
 $S_o (x) = \frac{1}{d_{c}}\sum_{i=1}^{d_{c}} \mathbb{1}_{x_i=1}(x_i)$ where  $d_c$  is the number of extras within the category
 
+We created these columns to try a model using only these 6 columns instead of the extras. 
+
+The advantage of this method is that we simplify the model through dimension reduction while keeping interpretability and as we see on the correlation plot below the categories positively correlate with the price. 
+
+The disadvantages of this method is that we loose interpretability about the impact of an individual extra, for example a listing with only apple car play set to True in infotainment will have the same score as a car with only cd player and therefore we degrade our ability to interpret how a specific extra might affect the prediction, to tackle this we could have weighted each extra in the score with the normalised correlation coefficients with respect to the price for example (this could be a future experiment). Another disadvantage we see on the correlation plot below is that these new are correlated and therefore would not be interesting in models such as a linear regression. Since we plan to use ensemble methods, correlated features aren't as detrimental and we will therefore try using these. 
+
+![image](https://github.com/user-attachments/assets/4f3038a4-cec8-4d57-b8d4-920969c28978)
+
 
 
 
