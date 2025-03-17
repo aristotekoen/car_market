@@ -241,20 +241,21 @@ In this section, we provide a visualisation of how a change on a certain feature
 user_input = st.session_state['user_input']
 list_features = [x for x in list(user_input.keys()) if x not in ['lat', 'lon', 'is_new', 'brand', 'model', 'never_crashed']]
 user_input_effect = st.selectbox("Select one characteristic and see how it could affect the value of your car!",list_features)
+_lock = RLock()
+with _lock:
+    if st.button('Show the effect!'):
+        test_set = load_test_set()
+        st.session_state['test_set'] = test_set
 
-if st.button('Show the effect!'):
-    test_set = load_test_set()
-    st.session_state['test_set'] = test_set
+        test_set = st.session_state['test_set']
+        df_input = pd.DataFrame([st.session_state['user_input']], columns=st.session_state['df_input'].columns)
+        st.session_state['df_input'] = df_input
 
-    test_set = st.session_state['test_set']
-    df_input = pd.DataFrame([st.session_state['user_input']], columns=st.session_state['df_input'].columns)
-    st.session_state['df_input'] = df_input
+        catboost_model_1 = st.session_state['catboost_model_1']
+        catboost_model_2 = st.session_state['catboost_model']
+        catboost_model_3 = st.session_state['catboost_model_3']
 
-    catboost_model_1 = st.session_state['catboost_model_1']
-    catboost_model_2 = st.session_state['catboost_model']
-    catboost_model_3 = st.session_state['catboost_model_3']
-    _lock = RLock()
-    with _lock:
+
         st.write("🔹 Matplotlib Backend:", plt.get_backend())
         fig, ax = plt.subplots(figsize = (10,8))
         ax.grid(True)
