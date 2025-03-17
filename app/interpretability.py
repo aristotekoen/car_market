@@ -28,8 +28,8 @@ def pdp_num(row,X_test_set, feature, models):
     :param models: list of q1,q2,q3 models
     :return: plot of the influence of the feature on estimated price for the row in question
     """
-    min_val = X_test_set[feature].quantile(0.05)
-    max_val = X_test_set[feature].quantile(0.95)
+    min_val = X_test_set[feature].min()
+    max_val = X_test_set[feature].max()
     range_vals = np.linspace(min_val,max_val,20)
     predictions_q1 = []
     predictions_q2 = []
