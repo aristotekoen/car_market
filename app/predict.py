@@ -7,6 +7,26 @@ from catboost import Pool, CatBoostRegressor
 from google.cloud import storage
 from const import *
 from reliability import reliability_score
+from interpretability import pdp_cat, pdp_num
+from io import BytesIO
+import matplotlib.pyplot as plt
+
+if "user_input" not in st.session_state:
+    st.session_state['user_input'] = None  # Set to None initially
+if "df_input" not in st.session_state:
+    st.session_state['df_input'] = None
+if "test_set" not in st.session_state:
+    st.session_state['test_set'] = None
+if "preds" not in st.session_state:
+    st.session_state['preds'] = None
+if "reliability" not in st.session_state:
+    st.session_state['reliability'] = None
+if "catboost_model_1" not in st.session_state:
+    st.session_state['catboost_model_1'] = None
+if "catboost_model" not in st.session_state:
+    st.session_state['catboost_model'] = None
+if "catboost_model_3" not in st.session_state:
+    st.session_state['catboost_model_3'] = None
 
 @st.cache_resource(show_spinner=False)
 def load_model(name):
@@ -28,6 +48,15 @@ def load_car_dictionnary():
     with open(dict_name, 'rb') as f:
         cars_dict = pickle.load(f)
     return cars_dict
+
+@st.cache_data(show_spinner=False)
+def load_test_set():
+    client = storage.Client()
+    bucket = client.get_bucket('price-estimation')
+    blob_test = bucket.get_blob('data/train_test_sets/test_02032024.csv')
+    test_bytes = blob_test.download_as_bytes()
+    test = pd.read_csv(BytesIO(test_bytes), index_col=0)
+    return test
 
 def create_dict_for_pred(model):
     return {k: np.nan for k in model.feature_names_}
@@ -109,66 +138,114 @@ with st.expander('✨ Select Extra Features', expanded=False):
         label = option.replace("extra_", "").replace("_", " ").title()
         extras[option] = st.checkbox(label)
 
+user_input = {'lat': lat,
+              'lon': longitude,
+              'is_new': is_new,
+              'mileage': mileage,
+              'crashed': crashed,
+              'engine_size': engine_size,
+              'registration_year': registration_year,
+              'engine_power': engine_power,
+              'fuel_type': fuel_type,
+              'gearbox_type': gearbox_type,
+              'brand': brand,
+              'model': model,
+              'never_crashed': never_crashed
+              }
+
+user_input.update(extras)
+
+rest_dict = {
+    'interior_type': interior_type,
+    'seats': seats,
+    'exterior_color': exterior_color,
+    'number_plate_ending': number_plate_ending,
+    'interior_color': interior_color,
+    'rim_size': rim_size,
+    'body_type': body_type,
+    'drive_type': drive_type,
+    'doors': doors,
+    'is_metallic': is_metallic}
+
+user_input.update(rest_dict)
+
+st.session_state['user_input'] = user_input
+
+
 st.header("🔮 Ready to estimate the price of your car?")
 
 st.write("")
 if st.button("Predict car price", use_container_width=True):
+    st.session_state['preds'] = None
+    st.session_state['reliability'] = None
     with st.spinner("Estimating car price..."):
-        user_input = {'lat': lat,
-     'lon': longitude,
-     'is_new': is_new,
-     'mileage': mileage,
-     'crashed': crashed,
-     'engine_size': engine_size,
-     'registration_year': registration_year,
-     'engine_power': engine_power,
-     'fuel_type': fuel_type,
-     'gearbox_type': gearbox_type,
-     'brand': brand,
-     'model': model,
-     'never_crashed': never_crashed
-                      }
 
-        user_input.update(extras)
-
-        rest_dict = {
-     'interior_type': interior_type,
-     'seats': seats,
-     'exterior_color': exterior_color,
-     'number_plate_ending': number_plate_ending,
-     'interior_color': interior_color,
-     'rim_size': rim_size,
-     'body_type': body_type,
-     'drive_type': drive_type,
-     'doors': doors,
-     'is_metallic': is_metallic}
-
-        user_input.update(rest_dict)
 
 
         catboost_model = load_model('q2')
         catboost_model_1 = load_model('q1')
         catboost_model_3 = load_model('q3')
 
+        st.session_state['catboost_model_1'] = catboost_model_1
+        st.session_state['catboost_model'] = catboost_model
+        st.session_state['catboost_model_3'] = catboost_model_3
+
         feature_names = catboost_model.feature_names_
         df_input = pd.DataFrame([user_input], columns=feature_names)
+
+        st.session_state['df_input'] = df_input
+
         df_pool = Pool(df_input, cat_features=catboost_model.get_cat_feature_indices())
 
         price_q1, price_q2, price_q3 = predict_price(df_pool, catboost_model_1, catboost_model, catboost_model_3)
-
+        st.session_state['preds'] = (price_q1, price_q2, price_q3)
         reliability = reliability_score(price_q1,price_q2,price_q3,0.2,20)
+        st.session_state['reliability'] = reliability
 
-        col1, col2, col3 = st.columns(3)
 
-        col1.metric(f"Estimated Low Price", value=f"{int(price_q1)} €")
-        col2.metric(f"Estimated Price",value=f"{int(price_q2)} €")
-        col3.metric(f"Estimated High Price", value=f"{int(price_q3)} €")
 
-        if reliability >= 0.75:
-            icon = "🟢"
-        elif 0.25 <= reliability < 0.75:
-            icon = "🟠"
-        else:
-            icon = "🔴"
-        st.write("")
-        st.metric(label="Reliability Score", value=f"{icon}  {int(reliability*100)}%", delta="")
+if "preds" in st.session_state and st.session_state['preds'] is not None:
+    preds = st.session_state['preds']
+    price_q1, price_q2, price_q3 = preds[0], preds[1], preds[2]
+    reliability = st.session_state['reliability']
+
+    col1, col2, col3 = st.columns(3)
+    col1.metric(f"Estimated Low Price", value=f"{int(price_q1)} €")
+    col2.metric(f"Estimated Price", value=f"{int(price_q2)} €")
+    col3.metric(f"Estimated High Price", value=f"{int(price_q3)} €")
+
+    if reliability >= 0.75:
+        icon = "🟢"
+    elif 0.25 <= reliability < 0.75:
+        icon = "🟠"
+    else:
+        icon = "🔴"
+    st.write("")
+    st.metric(label="Reliability Score", value=f"{icon}  {int(reliability * 100)}%", delta="")
+
+
+st.header('🔍 Effect of features on the estimated price')
+
+user_input = st.session_state['user_input']
+user_input_effect = st.selectbox("Select the attribute on which you'd like to see the effect:",list(user_input.keys()))
+
+if st.button('Show the effect!'):
+
+    test_set = load_test_set()
+    st.session_state['test_set'] = test_set
+
+    test_set = st.session_state['test_set']
+    df_input = st.session_state['df_input']
+
+    catboost_model_1 = st.session_state['catboost_model_1']
+    catboost_model_2 = st.session_state['catboost_model']
+    catboost_model_3 = st.session_state['catboost_model_3']
+
+    if isinstance(df_input[user_input_effect].values[0], float) or isinstance(df_input[user_input_effect].values[0],int):
+        print('Hello')
+        pdp_num(df_input, test_set, user_input_effect,[catboost_model_1,catboost_model_2,catboost_model_3])
+        st.pyplot(plt.gcf())
+
+    else:
+        pdp_cat(df_input, test_set, user_input_effect, [catboost_model_1, catboost_model_2, catboost_model_3])
+        st.pyplot(plt.gcf())
