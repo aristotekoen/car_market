@@ -224,6 +224,9 @@ if "preds" in st.session_state and st.session_state['preds'] is not None:
     st.write("")
     st.metric(label="Reliability Score", value=f"{icon}  {int(reliability * 100)}%", delta="")
 
+st.write("")
+st.write("")
+st.write("")
 
 st.header('🔍 Effect of features on the estimated price')
 
