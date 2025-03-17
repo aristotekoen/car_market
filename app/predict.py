@@ -242,7 +242,7 @@ if st.button('Show the effect!'):
     catboost_model_3 = st.session_state['catboost_model_3']
 
     if isinstance(df_input[user_input_effect].values[0], float) or isinstance(df_input[user_input_effect].values[0],int):
-        print('Hello')
+        plt.figure
         pdp_num(df_input, test_set, user_input_effect,[catboost_model_1,catboost_model_2,catboost_model_3])
         st.pyplot(plt.gcf())
 

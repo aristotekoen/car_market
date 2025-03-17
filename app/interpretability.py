@@ -55,7 +55,7 @@ def pdp_cat(row, X_test_set, feature, models):
     elif feature == 'drive_type':
         range_vals = drive_types
     elif feature == 'body_type':
-        range_vals == body_types
+        range_vals = body_types
     else:
         range_vals = X_test_set[feature].unique()
 
