@@ -10,8 +10,10 @@ from reliability import reliability_score
 from interpretability import pdp_cat, pdp_num
 from io import BytesIO
 import matplotlib.pyplot as plt
+import matplotlib
 from threading import RLock
 
+matplotlib.use("Agg")
 if "user_input" not in st.session_state:
     st.session_state['user_input'] = None
 if "df_input" not in st.session_state:
@@ -253,9 +255,11 @@ if st.button('Show the effect!'):
     catboost_model_3 = st.session_state['catboost_model_3']
     _lock = RLock()
     with _lock:
-
+        st.write("🔹 Matplotlib Backend:", plt.get_backend())
         fig, ax = plt.subplots(figsize = (10,8))
         ax.grid(True)
+
+        st.write("🔹 Figure created:", fig is not None)
         if isinstance(df_input[user_input_effect].values[0], float) or isinstance(df_input[user_input_effect].values[0],int):
             pdp_num(df_input, test_set, user_input_effect,[catboost_model_1,catboost_model_2,catboost_model_3], ax)
             fig.show()
