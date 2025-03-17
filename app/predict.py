@@ -260,7 +260,7 @@ with _lock:
 
 
         if isinstance(df_input[user_input_effect].values[0], float) or isinstance(df_input[user_input_effect].values[0],int):
-            fig = pdp_num(df_input, test_set, user_input_effect,[catboost_model_1,catboost_model_2,catboost_model_3])
+            fig, debug = pdp_num(df_input, test_set, user_input_effect,[catboost_model_1,catboost_model_2,catboost_model_3])
             st.write("🔹 Figure created:", fig is not None)
             fig.show()
             st.pyplot(fig)
@@ -271,4 +271,6 @@ with _lock:
             st.write("🔹 Figure created:", fig is not None)
             st.pyplot(fig)
 
+        for msg in debug:
+            st.write(msg)
         st.pyplot(fig)

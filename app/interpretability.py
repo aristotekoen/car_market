@@ -29,6 +29,9 @@ def pdp_num(row,X_test_set, feature, models):
     :param models: list of q1,q2,q3 models
     :return: plot of the influence of the feature on estimated price for the row in question
     """
+
+    debug_info = []
+    debug_info.append(f"🔹 pdp_num() called for feature: {feature}")
     min_val = X_test_set[feature].min()
     max_val = X_test_set[feature].max()
     range_vals = np.linspace(min_val,max_val,20)
@@ -42,6 +45,10 @@ def pdp_num(row,X_test_set, feature, models):
         predictions_q1.append(pred1)
         predictions_q2.append(pred2)
         predictions_q3.append(pred3)
+
+    debug_info.append(f"🔹 range_vals (X-axis): {range_vals}")
+    debug_info.append(f"🔹 predictions_q2 (Y-axis): {predictions_q2}")
+
     fig, ax = plt.subplots(figsize=(10,8))
     ax.plot(range_vals, predictions_q2, label="Estimated price")
     ax.fill_between(range_vals, predictions_q1, predictions_q3,color='blue', alpha=0.3, label='Estimated Price Range')
@@ -49,7 +56,9 @@ def pdp_num(row,X_test_set, feature, models):
     ax.set_xlabel(feature)
     ax.set_title('Effect of feature {} on the estimated price'.format(feature))
     ax.legend()
-    return fig
+    debug_info.append(f"🔹 Number of lines in plot: {len(ax.lines)}")
+    debug_info.append(f"🔹 Number of patches: {len(ax.patches)}")
+    return fig, debug_info
 
 
 def pdp_cat(row, X_test_set, feature, models):
