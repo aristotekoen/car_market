@@ -230,9 +230,14 @@ st.write("")
 
 st.header('🔍 Effect of features on the estimated price')
 
+st.markdown("""
+In this section, we provide a visualisation of how a change on a certain feature of the car affects the estimated price while keeping all the other characteristics to the value you entered for estimating the price.   
+  
+""")
+
 user_input = st.session_state['user_input']
 list_features = [x for x in list(user_input.keys()) if x not in ['lat', 'lon', 'is_new', 'brand', 'model', 'never_crashed']]
-user_input_effect = st.selectbox("Select the attribute on which you'd like to see the effect:",list_features)
+user_input_effect = st.selectbox("Select one characteristic and see how it could affect the value of your car!",list_features)
 
 if st.button('Show the effect!'):
     test_set = load_test_set()
