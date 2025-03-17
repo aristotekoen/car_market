@@ -12,7 +12,7 @@ from io import BytesIO
 import matplotlib.pyplot as plt
 
 if "user_input" not in st.session_state:
-    st.session_state['user_input'] = None  # Set to None initially
+    st.session_state['user_input'] = None
 if "df_input" not in st.session_state:
     st.session_state['df_input'] = None
 if "test_set" not in st.session_state:
@@ -169,6 +169,7 @@ rest_dict = {
 
 user_input.update(rest_dict)
 
+st.session_state['user_input'] = None
 st.session_state['user_input'] = user_input
 
 
@@ -227,15 +228,16 @@ if "preds" in st.session_state and st.session_state['preds'] is not None:
 st.header('🔍 Effect of features on the estimated price')
 
 user_input = st.session_state['user_input']
-user_input_effect = st.selectbox("Select the attribute on which you'd like to see the effect:",list(user_input.keys()))
+list_features = [x for x in list(user_input.keys()) if x not in ['lat', 'lon', 'is_new', 'brand', 'model', 'never_crashed']]
+user_input_effect = st.selectbox("Select the attribute on which you'd like to see the effect:",list_features)
 
 if st.button('Show the effect!'):
-
     test_set = load_test_set()
     st.session_state['test_set'] = test_set
 
     test_set = st.session_state['test_set']
-    df_input = st.session_state['df_input']
+    df_input = pd.DataFrame([st.session_state['user_input']], columns=st.session_state['df_input'].columns)
+    st.session_state['df_input'] = df_input
 
     catboost_model_1 = st.session_state['catboost_model_1']
     catboost_model_2 = st.session_state['catboost_model']

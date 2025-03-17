@@ -28,9 +28,8 @@ def pdp_num(row,X_test_set, feature, models):
     :param models: list of q1,q2,q3 models
     :return: plot of the influence of the feature on estimated price for the row in question
     """
-    min_val = X_test_set[feature].min()
-    max_val = X_test_set[feature].max()
-    new_set = X_test_set.copy()
+    min_val = X_test_set[feature].quantile(0.05)
+    max_val = X_test_set[feature].quantile(0.95)
     range_vals = np.linspace(min_val,max_val,20)
     predictions_q1 = []
     predictions_q2 = []
@@ -44,7 +43,7 @@ def pdp_num(row,X_test_set, feature, models):
         predictions_q3.append(pred3)
     plt.plot(range_vals, predictions_q2, label="Estimated price")
     plt.fill_between(range_vals, predictions_q1, predictions_q3,color='blue', alpha=0.3, label='Estimated Price Range')
-    plt.title('PDP for feature {}'.format(feature))
+    plt.title('Effect of feature {} on the estimated price'.format(feature))
 
 
 def pdp_cat(row, X_test_set, feature, models):
@@ -57,7 +56,7 @@ def pdp_cat(row, X_test_set, feature, models):
     elif feature == 'body_type':
         range_vals = body_types
     else:
-        range_vals = X_test_set[feature].unique()
+        range_vals = X_test_set[feature].dropna().unique()
 
     predictions_q1 = []
     predictions_q2 = []
@@ -74,4 +73,4 @@ def pdp_cat(row, X_test_set, feature, models):
     plt.scatter(np.arange(df.cats.shape[0]), df.pred_q2)
     plt.fill_between(np.arange(df.cats.shape[0]), df.pred_q1, df.pred_q3, alpha=0.2, color='blue')
     plt.xticks(np.arange(df.cats.shape[0]), df.cats, rotation = 60, fontsize=5)
-    plt.title('PDP for feature {}'.format(feature))
+    plt.title('Effect of feature {} on the estimated price'.format(feature))
