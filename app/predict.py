@@ -1,19 +1,19 @@
 import pickle
+import tempfile
+from io import BytesIO
+from threading import RLock
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import streamlit as st
 from catboost import Pool, CatBoostRegressor
 from google.cloud import storage
-from const import *
-from reliability import reliability_score
-from interpretability import pdp_cat, pdp_num
-from io import BytesIO
-import matplotlib.pyplot as plt
-import matplotlib
-from threading import RLock
 
-matplotlib.use("Agg")
+from const import *
+from interpretability import pdp_cat, pdp_num
+from reliability import reliability_score
+
 if "user_input" not in st.session_state:
     st.session_state['user_input'] = None
 if "df_input" not in st.session_state:
@@ -256,21 +256,13 @@ with _lock:
         catboost_model_3 = st.session_state['catboost_model_3']
 
 
-        st.write("🔹 Matplotlib Backend:", plt.get_backend())
-
-
         if isinstance(df_input[user_input_effect].values[0], float) or isinstance(df_input[user_input_effect].values[0],int):
-            fig, debug = pdp_num(df_input, test_set, user_input_effect,[catboost_model_1,catboost_model_2,catboost_model_3])
-            st.write("🔹 Figure created:", fig is not None)
-            fig.show()
-            st.pyplot(fig)
+            fig = pdp_num(df_input, test_set, user_input_effect,[catboost_model_1,catboost_model_2,catboost_model_3])
 
         else:
             fig = pdp_cat(df_input, test_set, user_input_effect, [catboost_model_1, catboost_model_2, catboost_model_3])
-            fig.show()
-            st.write("🔹 Figure created:", fig is not None)
-            st.pyplot(fig)
 
-        for msg in debug:
-            st.write(msg)
-        st.pyplot(fig)
+
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmpfile:
+            fig.savefig(tmpfile.name)
+            st.image(tmpfile.name)

@@ -46,9 +46,6 @@ def pdp_num(row,X_test_set, feature, models):
         predictions_q2.append(pred2)
         predictions_q3.append(pred3)
 
-    debug_info.append(f"🔹 range_vals (X-axis): {range_vals}")
-    debug_info.append(f"🔹 predictions_q2 (Y-axis): {predictions_q2}")
-
     fig, ax = plt.subplots(figsize=(10,8))
     ax.plot(range_vals, predictions_q2, label="Estimated price")
     ax.fill_between(range_vals, predictions_q1, predictions_q3,color='blue', alpha=0.3, label='Estimated Price Range')
@@ -56,9 +53,7 @@ def pdp_num(row,X_test_set, feature, models):
     ax.set_xlabel(feature)
     ax.set_title('Effect of feature {} on the estimated price'.format(feature))
     ax.legend()
-    debug_info.append(f"🔹 Number of lines in plot: {len(ax.lines)}")
-    debug_info.append(f"🔹 Number of patches: {len(ax.patches)}")
-    return fig, debug_info
+    return fig
 
 
 def pdp_cat(row, X_test_set, feature, models):
