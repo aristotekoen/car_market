@@ -271,4 +271,4 @@ with _lock:
             st.write("🔹 Figure created:", fig is not None)
             st.pyplot(fig)
 
-    st.pyplot(fig)
+        st.pyplot(fig)
