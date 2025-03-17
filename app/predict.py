@@ -257,16 +257,18 @@ with _lock:
 
 
         st.write("🔹 Matplotlib Backend:", plt.get_backend())
-        fig, ax = plt.subplots(figsize = (10,8))
-        ax.grid(True)
 
-        st.write("🔹 Figure created:", fig is not None)
+
         if isinstance(df_input[user_input_effect].values[0], float) or isinstance(df_input[user_input_effect].values[0],int):
-            fig = pdp_num(df_input, test_set, user_input_effect,[catboost_model_1,catboost_model_2,catboost_model_3], ax)
+            fig = pdp_num(df_input, test_set, user_input_effect,[catboost_model_1,catboost_model_2,catboost_model_3])
+            st.write("🔹 Figure created:", fig is not None)
             fig.show()
             st.pyplot(fig)
 
         else:
-            pdp_cat(df_input, test_set, user_input_effect, [catboost_model_1, catboost_model_2, catboost_model_3], ax)
+            fig = pdp_cat(df_input, test_set, user_input_effect, [catboost_model_1, catboost_model_2, catboost_model_3])
             fig.show()
+            st.write("🔹 Figure created:", fig is not None)
             st.pyplot(fig)
+
+    st.pyplot(fig)

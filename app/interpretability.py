@@ -20,7 +20,7 @@ def predict_price(df, q1, q2, q3):
 
     return price_q1, price_q2, price_q3
 
-def pdp_num(row,X_test_set, feature, models, ax):
+def pdp_num(row,X_test_set, feature, models):
     """
     Function to get partial dependency plot for a numerical feature.
     :param row: item to be estimated processed for prediction
@@ -52,7 +52,7 @@ def pdp_num(row,X_test_set, feature, models, ax):
     return fig
 
 
-def pdp_cat(row, X_test_set, feature, models, ax):
+def pdp_cat(row, X_test_set, feature, models):
     if feature == 'fuel_type':
         range_vals = fuel_types
     elif feature == 'number_plate_ending':
