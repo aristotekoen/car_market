@@ -255,8 +255,10 @@ if st.button('Show the effect!'):
     ax.grid(True)
     if isinstance(df_input[user_input_effect].values[0], float) or isinstance(df_input[user_input_effect].values[0],int):
         pdp_num(df_input, test_set, user_input_effect,[catboost_model_1,catboost_model_2,catboost_model_3], ax)
+        fig.show()
+        st.pyplot(fig)
 
     else:
         pdp_cat(df_input, test_set, user_input_effect, [catboost_model_1, catboost_model_2, catboost_model_3], ax)
-    plt.show()
-    st.pyplot(fig)
+        fig.show()
+        st.pyplot(fig)
