@@ -6,6 +6,7 @@ import streamlit as st
 from catboost import Pool, CatBoostRegressor
 from google.cloud import storage
 from const import *
+from reliability import reliability_score
 
 @st.cache_resource(show_spinner=False)
 def load_model(name):
@@ -56,9 +57,9 @@ This **machine learning model** estimates the price of a used car based on vario
 
 ✅ **Simply fill in the details** and click the **Predict** button to get:
 - An **estimated price** for your car 💰
+- A **price range** (low & high) 📈
 
 Coming soon:
-- A **price range** (low & high) 📈
 - A **confidence level** for accuracy 🎯
 - Analysis of the impact of the main features on your car price
 """)
@@ -72,7 +73,7 @@ st.header('ℹ️ Basic Information')
 
 mileage = float(st.number_input("Mileage in km", value=10000))
 registration_year = float(st.number_input("Registration year", min_value=2000, max_value=2025, format="%d"))
-fuel_type = st.selectbox("Fuel type", fuel_types, index=len(fuel_types)-1)
+fuel_type = st.selectbox("Fuel type", fuel_types, index=0)
 gearbox_type = st.selectbox("Gearbox type", gearbox_types, index=1)
 seats = float(st.slider("Number of seats", min_value=1, max_value=10, format="%d", value=5))
 doors = float(st.number_input("Number of doors", min_value=1, max_value=10, format="%d", value=5))
@@ -86,7 +87,7 @@ engine_size = float(st.number_input("Engine size in cc", value=1000))
 engine_power = float(st.number_input("Engine power in bhp", value=100))
 
 
-st.header('🔧 Vehicle condition and last technical check up')
+st.header('🔧 Vehicle condition ')
 is_new = st.selectbox("Is your car new?", [True, False], index=1)
 crashed = st.selectbox("Is the vehicle sold crashed?", [True, False], index=1)
 never_crashed = st.selectbox("Was the vehicle crashed in the past?", [True, False], index=1)
@@ -155,9 +156,19 @@ if st.button("Predict car price", use_container_width=True):
 
         price_q1, price_q2, price_q3 = predict_price(df_pool, catboost_model_1, catboost_model, catboost_model_3)
 
+        reliability = reliability_score(price_q1,price_q2,price_q3,0.2,20)
 
         col1, col2, col3 = st.columns(3)
 
         col1.metric(f"Estimated Low Price", value=f"{int(price_q1)} €")
         col2.metric(f"Estimated Price",value=f"{int(price_q2)} €")
         col3.metric(f"Estimated High Price", value=f"{int(price_q3)} €")
+
+        if reliability >= 0.75:
+            icon = "🟢"
+        elif 0.25 <= reliability < 0.75:
+            icon = "🟠"
+        else:
+            icon = "🔴"
+        st.write("")
+        st.metric(label="Reliability Score", value=f"{icon}  {int(reliability*100)}%", delta="")
