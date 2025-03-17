@@ -10,6 +10,7 @@ from reliability import reliability_score
 from interpretability import pdp_cat, pdp_num
 from io import BytesIO
 import matplotlib.pyplot as plt
+from threading import RLock
 
 if "user_input" not in st.session_state:
     st.session_state['user_input'] = None
@@ -250,15 +251,17 @@ if st.button('Show the effect!'):
     catboost_model_1 = st.session_state['catboost_model_1']
     catboost_model_2 = st.session_state['catboost_model']
     catboost_model_3 = st.session_state['catboost_model_3']
+    _lock = RLock()
+    with _lock:
 
-    fig, ax = plt.subplots(figsize = (10,8))
-    ax.grid(True)
-    if isinstance(df_input[user_input_effect].values[0], float) or isinstance(df_input[user_input_effect].values[0],int):
-        pdp_num(df_input, test_set, user_input_effect,[catboost_model_1,catboost_model_2,catboost_model_3], ax)
-        fig.show()
-        st.pyplot(fig)
+        fig, ax = plt.subplots(figsize = (10,8))
+        ax.grid(True)
+        if isinstance(df_input[user_input_effect].values[0], float) or isinstance(df_input[user_input_effect].values[0],int):
+            pdp_num(df_input, test_set, user_input_effect,[catboost_model_1,catboost_model_2,catboost_model_3], ax)
+            fig.show()
+            st.pyplot(fig)
 
-    else:
-        pdp_cat(df_input, test_set, user_input_effect, [catboost_model_1, catboost_model_2, catboost_model_3], ax)
-        fig.show()
-        st.pyplot(fig)
+        else:
+            pdp_cat(df_input, test_set, user_input_effect, [catboost_model_1, catboost_model_2, catboost_model_3], ax)
+            fig.show()
+            st.pyplot(fig)

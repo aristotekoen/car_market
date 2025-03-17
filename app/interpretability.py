@@ -4,6 +4,7 @@ from catboost import CatBoostRegressor, Pool
 import seaborn as sns
 import matplotlib.pyplot as plt
 from const import *
+from threading import RLock
 
 
 def predict_price(df, q1, q2, q3):
@@ -41,12 +42,14 @@ def pdp_num(row,X_test_set, feature, models, ax):
         predictions_q1.append(pred1)
         predictions_q2.append(pred2)
         predictions_q3.append(pred3)
-    ax.plot(range_vals, predictions_q2, label="Estimated price")
-    ax.fill_between(range_vals, predictions_q1, predictions_q3,color='blue', alpha=0.3, label='Estimated Price Range')
-    ax.set_ylabel('Price (€)')
-    ax.set_xlabel(feature)
-    ax.set_title('Effect of feature {} on the estimated price'.format(feature))
-    ax.legend()
+    _lock = RLock()
+    with _lock:
+        ax.plot(range_vals, predictions_q2, label="Estimated price")
+        ax.fill_between(range_vals, predictions_q1, predictions_q3,color='blue', alpha=0.3, label='Estimated Price Range')
+        ax.set_ylabel('Price (€)')
+        ax.set_xlabel(feature)
+        ax.set_title('Effect of feature {} on the estimated price'.format(feature))
+        ax.legend()
 
 
 def pdp_cat(row, X_test_set, feature, models, ax):
@@ -73,10 +76,12 @@ def pdp_cat(row, X_test_set, feature, models, ax):
         predictions_q3.append(pred_q3)
         vals.append(str(val))
     df = pd.DataFrame({'cats':vals, 'pred_q1': predictions_q1, 'pred_q2':predictions_q2, 'pred_q3':predictions_q3}).sort_values(by='pred_q2', ascending=False)
-    ax.scatter(np.arange(df.cats.shape[0]), df.pred_q2)
-    ax.fill_between(np.arange(df.cats.shape[0]), df.pred_q1, df.pred_q3, alpha=0.2, color='blue')
-    ax.set_xticks(np.arange(df.cats.shape[0]), df.cats, rotation = 60, fontsize=5)
-    ax.set_ylabel('Price (€)')
-    ax.set_xlabel(feature)
-    ax.set_title('Effect of feature {} on the estimated price'.format(feature))
-    ax.legend()
+    _lock = RLock()
+    with _lock:
+        ax.scatter(np.arange(df.cats.shape[0]), df.pred_q2)
+        ax.fill_between(np.arange(df.cats.shape[0]), df.pred_q1, df.pred_q3, alpha=0.2, color='blue')
+        ax.set_xticks(np.arange(df.cats.shape[0]), df.cats, rotation = 60, fontsize=5)
+        ax.set_ylabel('Price (€)')
+        ax.set_xlabel(feature)
+        ax.set_title('Effect of feature {} on the estimated price'.format(feature))
+        ax.legend()
