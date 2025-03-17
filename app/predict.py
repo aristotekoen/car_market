@@ -262,7 +262,7 @@ with _lock:
 
         st.write("🔹 Figure created:", fig is not None)
         if isinstance(df_input[user_input_effect].values[0], float) or isinstance(df_input[user_input_effect].values[0],int):
-            pdp_num(df_input, test_set, user_input_effect,[catboost_model_1,catboost_model_2,catboost_model_3], ax)
+            fig = pdp_num(df_input, test_set, user_input_effect,[catboost_model_1,catboost_model_2,catboost_model_3], ax)
             fig.show()
             st.pyplot(fig)
 
