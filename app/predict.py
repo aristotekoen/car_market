@@ -258,5 +258,5 @@ if st.button('Show the effect!'):
 
     else:
         pdp_cat(df_input, test_set, user_input_effect, [catboost_model_1, catboost_model_2, catboost_model_3])
-
+    plt.show()
     st.pyplot(fig)
