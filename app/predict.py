@@ -254,9 +254,9 @@ if st.button('Show the effect!'):
     fig, ax = plt.subplots(figsize = (10,8))
     ax.grid(True)
     if isinstance(df_input[user_input_effect].values[0], float) or isinstance(df_input[user_input_effect].values[0],int):
-        pdp_num(df_input, test_set, user_input_effect,[catboost_model_1,catboost_model_2,catboost_model_3])
+        pdp_num(df_input, test_set, user_input_effect,[catboost_model_1,catboost_model_2,catboost_model_3], ax)
 
     else:
-        pdp_cat(df_input, test_set, user_input_effect, [catboost_model_1, catboost_model_2, catboost_model_3])
+        pdp_cat(df_input, test_set, user_input_effect, [catboost_model_1, catboost_model_2, catboost_model_3], ax)
     plt.show()
     st.pyplot(fig)
