@@ -1,3 +1,5 @@
+import base64
+
 import numpy as np
 import pandas as pd
 from catboost import CatBoostRegressor, Pool
@@ -5,6 +7,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from const import *
 from threading import RLock
+import io
 
 
 def predict_price(df, q1, q2, q3):
@@ -54,7 +57,12 @@ def pdp_num(row,X_test_set, feature, models):
     ax.set_title('Effect of feature {} on the estimated price'.format(feature))
     ax.legend()
     plt.close(fig)
-    return fig
+
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png")
+    buf.seek(0)
+    img_base64 = base64.b64encode(buf.getvalue()).decode("utf-8")
+    return img_base64
 
 
 def pdp_cat(row, X_test_set, feature, models):
@@ -90,5 +98,10 @@ def pdp_cat(row, X_test_set, feature, models):
     ax.set_title('Effect of feature {} on the estimated price'.format(feature))
     ax.legend()
     plt.close(fig)
-    return fig
+
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png")
+    buf.seek(0)
+    img_base64 = base64.b64encode(buf.getvalue()).decode("utf-8")
+    return img_base64
 
