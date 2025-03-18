@@ -178,6 +178,12 @@ st.session_state['user_input'] = user_input
 
 st.header("🔮 Ready to estimate the price of your car?")
 
+fig, ax = plt.subplots(figsize=(10,8))
+xs = np.arange(100)
+ax.plot(xs, np.sin(xs))
+st.pyplot(fig)
+
+
 st.write("")
 if st.button("Predict car price", use_container_width=True):
     st.session_state['preds'] = None
@@ -227,6 +233,11 @@ if "preds" in st.session_state and st.session_state['preds'] is not None:
     st.write("")
     st.metric(label="Reliability Score", value=f"{icon}  {int(reliability * 100)}%", delta="")
 
+    fig, ax = plt.subplots(figsize=(10, 8))
+    xs = np.arange(100)
+    ax.plot(xs, np.sin(xs))
+    st.pyplot(fig)
+
 st.write("")
 st.write("")
 st.write("")
@@ -237,6 +248,11 @@ st.markdown("""
 In this section, we provide a visualisation of how a change on a certain feature of the car affects the estimated price while keeping all the other characteristics to the value you entered for estimating the price.   
   
 """)
+
+fig, ax = plt.subplots(figsize=(10,8))
+xs = np.arange(100)
+ax.plot(xs, np.sin(xs))
+st.pyplot(fig)
 
 user_input = st.session_state['user_input']
 list_features = [x for x in list(user_input.keys()) if x not in ['lat', 'lon', 'is_new', 'brand', 'model', 'never_crashed']]
@@ -254,7 +270,10 @@ with _lock:
         catboost_model_1 = st.session_state['catboost_model_1']
         catboost_model_2 = st.session_state['catboost_model']
         catboost_model_3 = st.session_state['catboost_model_3']
-
+        fig, ax = plt.subplots(figsize=(10,8))
+        xs = np.arange(100)
+        ax.plot(xs, np.sin(xs))
+        st.pyplot(fig)
 
         if isinstance(df_input[user_input_effect].values[0], float) or isinstance(df_input[user_input_effect].values[0],int):
             fig = pdp_num(df_input, test_set, user_input_effect,[catboost_model_1,catboost_model_2,catboost_model_3])
