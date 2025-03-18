@@ -260,6 +260,7 @@ with _lock:
         xs = np.arange(100)
         ax.plot(xs, np.sin(xs))
         st.pyplot(fig)
+        plt.close(fig)
 
         if isinstance(df_input[user_input_effect].values[0], float) or isinstance(df_input[user_input_effect].values[0],int):
             fig = pdp_num(df_input, test_set, user_input_effect,[catboost_model_1,catboost_model_2,catboost_model_3])

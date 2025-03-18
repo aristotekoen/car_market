@@ -53,6 +53,7 @@ def pdp_num(row,X_test_set, feature, models):
     ax.set_xlabel(feature)
     ax.set_title('Effect of feature {} on the estimated price'.format(feature))
     ax.legend()
+    plt.close(fig)
     return fig
 
 
@@ -88,5 +89,6 @@ def pdp_cat(row, X_test_set, feature, models):
     ax.set_xlabel(feature)
     ax.set_title('Effect of feature {} on the estimated price'.format(feature))
     ax.legend()
+    plt.close(fig)
     return fig
 
