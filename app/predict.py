@@ -259,20 +259,6 @@ with _lock:
         catboost_model_1 = st.session_state['catboost_model_1']
         catboost_model_2 = st.session_state['catboost_model']
         catboost_model_3 = st.session_state['catboost_model_3']
-        fig, ax = plt.subplots(figsize=(10,8))
-        xs = np.arange(100)
-
-
-        ax.plot(xs, np.sin(xs))
-        buffer = io.BytesIO()
-        fig.savefig(buffer, format="png")
-        buffer.seek(0)
-        img_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
-        img_src = f"data:image/png;base64,{img_base64}"
-        html_code = f'<img src="{img_src}" width="700px" style="border-radius:10px;"/>'
-        st.markdown(html_code, unsafe_allow_html=True)
-
-        plt.close(fig)
 
         if isinstance(df_input[user_input_effect].values[0], float) or isinstance(df_input[user_input_effect].values[0],int):
             fig = pdp_num(df_input, test_set, user_input_effect,[catboost_model_1,catboost_model_2,catboost_model_3])
@@ -283,8 +269,3 @@ with _lock:
         img_src = f"data:image/png;base64,{fig}"
         html_code = f'<img src="{img_src}" width="700px" style="border-radius:10px;"/>'
         st.markdown(html_code, unsafe_allow_html=True)
-
-      #  with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmpfile:
-      #      fig.savefig(tmpfile.name)
-      #      st.image(tmpfile.name)
-      #      plt.close(fig)
