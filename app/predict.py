@@ -178,13 +178,8 @@ st.session_state['user_input'] = user_input
 
 st.header("🔮 Ready to estimate the price of your car?")
 
-fig, ax = plt.subplots(figsize=(10,8))
-xs = np.arange(100)
-ax.plot(xs, np.sin(xs))
-st.pyplot(fig)
-
-
 st.write("")
+
 if st.button("Predict car price", use_container_width=True):
     st.session_state['preds'] = None
     st.session_state['reliability'] = None
@@ -233,11 +228,6 @@ if "preds" in st.session_state and st.session_state['preds'] is not None:
     st.write("")
     st.metric(label="Reliability Score", value=f"{icon}  {int(reliability * 100)}%", delta="")
 
-    fig, ax = plt.subplots(figsize=(10, 8))
-    xs = np.arange(100)
-    ax.plot(xs, np.sin(xs))
-    st.pyplot(fig)
-
 st.write("")
 st.write("")
 st.write("")
@@ -249,10 +239,6 @@ In this section, we provide a visualisation of how a change on a certain feature
   
 """)
 
-fig, ax = plt.subplots(figsize=(10,8))
-xs = np.arange(100)
-ax.plot(xs, np.sin(xs))
-st.pyplot(fig)
 
 user_input = st.session_state['user_input']
 list_features = [x for x in list(user_input.keys()) if x not in ['lat', 'lon', 'is_new', 'brand', 'model', 'never_crashed']]
@@ -285,3 +271,4 @@ with _lock:
         with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmpfile:
             fig.savefig(tmpfile.name)
             st.image(tmpfile.name)
+            plt.close(fig)
