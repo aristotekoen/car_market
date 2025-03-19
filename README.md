@@ -1,4 +1,4 @@
-# :car: :greece: AI powered Used Car Price Estimator
+# :car: :greece: Machine Learning Based Used Car Price Estimator
 
 ## 🔗 https://streamlit-app-305336925991.europe-west1.run.app/ 
 
