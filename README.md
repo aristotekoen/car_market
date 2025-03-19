@@ -304,6 +304,54 @@ Through this project we focused on three main modelling techniques:
 We noticed a significatively higher performance from catboost and therefore tried multiple different preprocessing techniques in order to find the most accurate method.
 
 
+#### Base model:
 
-  
+We first try a simple estimation method, grouping cars in three levels:
+
+* By brand, model , year
+* By brand, model
+* By brand
+
+For each car to predict we find its corresponding group in the training set at the most granular level first (by brand, model, year). If there are enough points in the group (greater than a fixed threshold) we estimate the price as the median price of the corresponding group in the training set. If the number of points in the training set is lower than the set threshold, we move to a group level with less granularity.
+
+The value of the threshold is a hyperparameter here. For a value of 1, the model will fit the training data to the finest level in every case. The higher the threshold, the harder it will be for a car to be estimated based on the finest level and therefore we risk underfitting. Below we will plot the mean absolute percentage error on the test set with respect to different thresholds. 
+
+![group_median_thresh](https://github.com/user-attachments/assets/b39cdbc9-a64d-45e3-a32e-4ed7b197b050)
+
+
+With a threshold of 1 we obtain a mean absolute percentage error of 22%. Below is a describe of the residuals, absolute residuals and absolute percentage errors. We see that in median the absolute pct error is of 12.2%
+
+|       |   residuals_median |   abs_residuals_median |     ape_median |
+|:------|-------------------:|-----------------------:|---------------:|
+| count |          20286     |               20286    | 20286          |
+| mean  |            537.334 |                2740.67 |     0.220556   |
+| std   |           6822.58  |                6270.94 |     0.585012   |
+| min   |        -120000     |                   0    |     0          |
+| 1%    |         -12499.1   |                   0    |     0          |
+| 5%    |          -4545     |                  99    |     0.00742092 |
+| 10%   |          -2810     |                 200    |     0.02       |
+| 25%   |          -1200     |                 550    |     0.05375    |
+| 50%   |              0     |                1300    |     0.122727   |
+| 75%   |           1480     |                2700    |     0.237179   |
+| 90%   |           3990     |                5600    |     0.421623   |
+| 95%   |           6750     |                9137.75 |     0.615908   |
+| 99%   |          20500     |               24601    |     1.99615    |
+| max   |         203074     |              203074    |    51.0301     |
+
+Advantage of the mode: simple approach, easily interpretable
+Disadvantage: We fail to take important charactersitics of the cars into account such as engine specs within a model, extras, mileage. If we look at examples  with the largest errors below, we make errors on cars with high mileage since this is not taken into account. Also we notice large errors due to outliers, we see some cars with a description mentioning this is a leasing with the price being the monthly dose, we also see cars being sold for spare parts, or an ad concerning an engine with 250 000 km being sold. 
+
+![image](https://github.com/user-attachments/assets/307ce0b7-296d-4a7e-878d-9668c485bd80)
+
+
+#### Grouped Linear Regression:
+
+We then try a similar approach but using linear regression. We observed linear relationships between the price of a car and certain features in the exploratory analysis. So linear regression seems like an adequate method in order to model the data. However, we also saw that these linearities appeared on groups. So in this method we again group the data. Since we saw a linear relationship with the registration year in our analysis we will use this feature as one of the independent variables in our model. That is why in this method we group in the following way:
+
+* By brand and model
+* By brand
+
+We model the price of the car as a linear regression with respect to mileage, engine_size, seats, registration_year, crashed, is_new. We did not include the engine power as we saw that engine power and size are highly correlated, something which goes against linear regression assumptions. 
+
+
 
