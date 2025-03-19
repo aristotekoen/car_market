@@ -554,4 +554,53 @@ We decide that we will consider a score of 0.5 when the level of uncertainty is 
 ![image](https://github.com/user-attachments/assets/45a9cf3e-6ef9-422c-8323-22e206b0f5ef)
 
 
+## Interpretability:
+
+Feature importances:
+
+Below we plot the feature importances of the chose catboost model: 
+
+
+![feature_importances_catboost](https://github.com/user-attachments/assets/721ae31b-b28d-4b02-aa99-c8b6edecaa9f)
+
+We see that the most important features are the engine size, power, brand, model, gearbox type, mileage, registration year.  
+
+In order for the user to get an idea of the way features such as mileage, engine power or extras would affect the price we display the Individual COnditional Expectation (ICE) plot which shows the predicted price for a range of values of the analysed feature, keeping all others fixed.
+
+As an example, the user here estimates a suzuki swift with 150000km from 2015, with 1200cc engine size, 70bhp. 
+![image](https://github.com/user-attachments/assets/e41bcc08-1225-4e27-afa3-85809f1746ee)
+
+If the user wants to see how mileage affects the price, we will plot the predicted price and IQR for this car making the value of mileage vary from 0 to a large value:
+
+![image](https://github.com/user-attachments/assets/efc987c9-fbed-492e-899d-dd08e2b9b244)
+
+
+It is interesting to see that the model becomes uncertain for unusual large engine sizes as the suzuki swift is a small car: 
+
+![image](https://github.com/user-attachments/assets/83532c93-188a-40fd-b8b9-a5a0b182eedb)
+
+
+
+## Deployment
+
+The model was deployed on google cloud run as a streamlit app containerised on google container registry. The model and experiments for training were run on a vm instance on google cloud platform in order to leverage catboost gpu compatibility. The streamlit app allows the user to input all the features taken into account by the model and to estimate the price and price range and reliability score of the car. It then allows the user to visualise effects of all the variables taken into account by the model. 
+
+The app gets redeployed everytime code is pushed in the main branch via git actions. 
+
+## Conclusion, challenges, weaknesses and potential improvements
+
+
+- Some models were listed at a very granular level on the website, for example mercedes A180, A 160, A200 instead of just mercedes ACLASS. The same thing is observed on various other brands with specs determining the model name such as bmws. This leads to certain models being sparse in the data set and regrouping them under the same class could have helped the model leverage the model feature more effectively
+- The condition of the car is very important and we haven't really taken that into account apart from the crashed boolean feature. In fact we saw multiple cars being sold for spare parts which had very low prices and identifying such cases could help clean the data more easily and also improve model performance. We could fine tune a transformer to classify car descriptions into Very good condition, good, normal, bad, very bad, unknown for example. We coudl also do it using the pictures by fine tuning a vision transformer. However this would require a labeled dataset, something which we did not have the time to construct for now.
+- Geolocation features weren't studied until now and it might be important to. In fact the car market could be different in different regions in greece? We did not focus on this as we assumed that prices shouldn't differ much accross the territory but this still needs to be verified
+- The Dataset was constructed from the scraping done in February. This gives us a frozen image of the car market in february 2025 and this means that model will not be able to effectively estimate car prices as precisely in a few months. In a real production environment, for the model to stay accurate and avoid data drift over time we should rescrape the website regularly and retrain the model on the new data, verifying that performance doesn't degrade over time.
+- We did not take the ad posting date or modification date into account as we only scraped the website once. However keeping track of ad history and price changes in a database could help take an additional temporal dimension into account which could be important. This is something we didn't take into account.
+- More advanced outlier removal strategies such as isolation forest, clustering algorithms could have been tried.
+- More advanced feature engineering techniques on extras for example or extracting additional information from text data could have been implemented.
+- More models could have been tried, for example generalised additive models seem like an ideal method as well for this type of data.
+- Extracting features from images to enrich the data using computer vision algorithms could help impute missing data
+
+The nature of the data and the time it took to scrape, clean and preprocess it until now did not allow me to explore all these factors deep enough but it remains something that I wish to do in the future.
+
+Thank you for your attention and looking forward to any feedback or insights you may have about the project. 
 
