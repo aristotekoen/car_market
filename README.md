@@ -310,6 +310,7 @@ We first try a simple estimation method, grouping cars in three levels:
 
 * By brand, model , year
 * By brand, model
+* By brand, year
 * By brand
 
 For each car to predict we find its corresponding group in the training set at the most granular level first (by brand, model, year). If there are enough points in the group (greater than a fixed threshold) we estimate the price as the median price of the corresponding group in the training set. If the number of points in the training set is lower than the set threshold, we move to a group level with less granularity.
@@ -343,6 +344,15 @@ Disadvantage: We fail to take important charactersitics of the cars into account
 
 ![image](https://github.com/user-attachments/assets/307ce0b7-296d-4a7e-878d-9668c485bd80)
 
+We see that based on the granularity of the group on which the price was estimated, the finer the group the better the estimation:
+
+![image](https://github.com/user-attachments/assets/ac9b4fda-8597-44d4-a6aa-f29dd48be6a8)
+
+We also see much higher errors on crashed cars.
+
+![image](https://github.com/user-attachments/assets/6cd0b616-f376-4b15-a8f7-16ab74a5c71d)
+
+
 
 #### Grouped Linear Regression:
 
@@ -351,7 +361,86 @@ We then try a similar approach but using linear regression. We observed linear r
 * By brand and model
 * By brand
 
-We model the price of the car as a linear regression with respect to mileage, engine_size, seats, registration_year, crashed, is_new. We did not include the engine power as we saw that engine power and size are highly correlated, something which goes against linear regression assumptions. 
+We model the price of the car as a linear regression with respect to mileage, engine_size, registration_year, crashed, is_new. We did not include the engine power as we saw that engine power and size are highly correlated, something which goes against linear regression assumptions. 
+
+If we look at the fitted linear regression on the group Citroen C3:
+
+We see a well conditioned covariance matrix, statistically significant estimated coefficients with respect to the p value for each coefficient. We see that the most impactful variable is the registration year which has a positive impact on the price, then we see that the mileage and the is_crashed variable affect negatively the price of the car and that the engine size impacts the price positively. We see an adjusted R2 of 0.89 meaning that our model captures most of the variance in the model effectively. 
+
+We had to scale the features as otherwise we would encounter ill conditioned covariance matrices leading to instabilities. We also took the log of the price for fitting the regressions as we saw that the linear relationships were stronger when looking at the logarithm.
+
+
+![image](https://github.com/user-attachments/assets/1bf22ac4-6cc1-4043-bf6e-972038974bce)
+
+
+We split the training in order to get a validation set and see which threshold minimises the error. We estimate that 15 is the ideal threshold: 
+
+![threshold_linreg](https://github.com/user-attachments/assets/645dff8b-c61a-41c3-9f79-063ce474fb58)
+
+
+After refitting the regressions on the whole training set these are the results we obtain: 
+
+|       |      ape_linreg |
+|:------|----------------:|
+| count | 20286           |
+| mean  |     0.191793    |
+| std   |     0.513715    |
+| min   |     1.89398e-05 |
+| 1%    |     0.00207039  |
+| 10%   |     0.0218623   |
+| 50%   |     0.122594    |
+| 90%   |     0.383605    |
+| 95%   |     0.530776    |
+| 99%   |     1.14574     |
+| max   |    51.6949      |
+
+We had to use a threshold of 20 as instabilities were encountered using 15 on the whole training set. We observe an improvement with respect to the base model both in mean and median. 
+
+We notice better estimations when the regressions are able to be fitted at the model level rather than at the brand stage:
+
+![image](https://github.com/user-attachments/assets/e47b2245-90b8-46d5-9844-eb7eb639e867)
+
+We notice that the method estimates newer models more precisely than older models:
+
+![image](https://github.com/user-attachments/assets/1f76e35e-c2bc-4861-a914-2ea688c52d99)
+
+Residuals seem to be normally distributed
+
+![image](https://github.com/user-attachments/assets/c883fcaf-5499-4b15-a856-812706df399f)
+
+
+#### Catboost
+
+As we saw with the base model and the linear regression we were forced to fit models on groups of cars using model and brand and sometimes registration year. The problem encountered with these methods were that for groups with very few observations we could not fit a model on the desired level of group granularity and therefore had to fit the model on a broader group (for example a porsche 918 would have to be estimated using a regression fitted on all porsches since there weren't enough of these cars in the dataset. This lead to worse estimations for car models which are not present enough in the dataset.
+
+Moreover, with linear regressions we were limited to using variables which displayed a somehow linear relationship with the price, however not all independent variables in our dataset have a linear relationship with the price (for example the latitude and the longitude).
+
+Ensemble methods such as Random Forests and Gradient boosting, based on fitting regression trees are still today the leading methods for tabular datasets. Their advantage is their ability to capture complex relationships, handle categorical variables efficiently while remaining very interpretable (although gradient boosted trees aren't as interpretable as compared to random forests).
+
+In our case gradient boosting and specifically Catboost seems like an ideal method. In fact Catboost is a gradient boosting algorithm which is tailored to datasets with sparts categorical features with high cardinality which it treats via an advanced version of target encoding (consisting of assigning the mean value of the target for each category level. It also handles missing values, treating them as a separate category.
+
+Some of these variables might intuitively have a great influence on the price of a car (for example the extras) however simple imputation methods for these variables would affect the structure of the data. In fact for the extras the NaN value means that we do not know if the car has this extra or not and therefore these should be  treated as a separate category. 
+
+The main features we have at our disposal on top of the the various extras and the constructed options columns discussed before were the following: 
+
+'lat', 'lon', 'is_new', 'mileage', 'crashed', 'engine_size', 'registration_month', 'registration_year', 'engine_power', 'fuel_type', 'gearbox_type', 'brand', 'model', 'interior_type', 'seats', 'kteo','exterior_color', 'number_plate_ending', 'emissions_co2', 'battery_charge_time', 'interior_color', 'rim_size', 'vehicle_height','number_of_gears', 'torque', 'gross_weight', 'acceleration', 'vehicle_width', 'body_type', 'vehicle_length', 'top_speed','wheelbase', 'fuel_consumption','drive_type', 'doors', 'is_metallic'
+
+We gained signficant improvements in performance using this method and we tried multiple preprocessing methods in order to compare performances (described below). In order to compare methods we used 3 fold cross validation on the training set and optimised hyperparameters using optuna, a bayesian hyperparameter optimisation library which given a grid of hyperparameters iteratively learns the optimal distribution of the hyperparameters and which prunes unpromising trials before the end of a run. We tried 30 runs for each method with Optuna. 
+
+1 - All Extras model: This method consisted of training catboost on all the above features, only dropping the extra category constructed column. We kept missing values as nans, and all text categorical features as strings as Catboost preprocesses them automatically  
+  
+2 - Options model: This method consists of keeping all features above but dropping the boolean extras columns. The extras are therefore taken into account with the constructed options columns discussed before 
+
+3 - Outlier removal: Then we constructed a method to remove outliers. In order to do this we clean outliers on the price, the engine size  and the engine power using the interquartile range method. We only remove outliers on the training set and evaluate the performance on the whole test set. For the price we removed outliers on the log transformed price as the price itself wasn't symmetric. For the price we detect abnormal prices on groups and thresholds again. We first group at the most granular levels, for groups with over 40 points, we compute the bounds of the interquartile range and remove values outside of it beyond 1.5 times above and below.  For the groups with less than 40 points we compute the IQR on a group by at the brand and model level. Then for the remaining groups we use the brand level. and for the remaining groups we compute bounds on the whole set.   
+
+4 - Drop unpractical: Keeping a product oriented mindset. We drop features which make the estimation too complicated for the end user. In fact, it would be very tedious each time a user wants to estimate a car to know the acceleration, torque, vehicle dimensions, weight, number of gears, co2 emissions for each model. So we try to restrict the features to the extras and to the main characteristics which a user is expected to know. Also, we know that the dropped features are highly correlated to  the car model, year and engine size in general. And we saw when looking at the feature importances of catboost on all features that in  these very specific characteristics were scoring low. 
+
+5 - Drop low importance: We fit a catboost model by dropping all feature importances of the all extras model lower than a certain threshold.  
+
+6 - Impute missing values: In this method we try to impute missing values in order to see if  this could improve performance using the all extras dataset. The imputing strategy was again based on groups. And we compute the mean value on groups for numerical values and the mode for categorical features (majority vote). If the group only has missing values we group at a less granular level.  
+
+
+The results can be found below: 
 
 
 
