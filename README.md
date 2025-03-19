@@ -5,7 +5,7 @@
 ## 📌 Table of Contents  
 
 - [🤖 How Does This Work?](#-how-does-this-work)  
-- [🗺️ Context of This Project](#-context-of-this-project)  
+- [🗺️ Context of This Project](#-context-of-this-project:)  
 - [🎯 Project Goals](#-project-goals)
 - [Methodology and Analyses](#-methodology-and-analyses)
 - [🕷️ Scraping](#-scraping)  
