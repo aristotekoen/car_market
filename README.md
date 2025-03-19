@@ -461,7 +461,7 @@ The main features we have at our disposal on top of the the various extras and t
 
 'lat', 'lon', 'is_new', 'mileage', 'crashed', 'engine_size', 'registration_month', 'registration_year', 'engine_power', 'fuel_type', 'gearbox_type', 'brand', 'model', 'interior_type', 'seats', 'kteo','exterior_color', 'number_plate_ending', 'emissions_co2', 'battery_charge_time', 'interior_color', 'rim_size', 'vehicle_height','number_of_gears', 'torque', 'gross_weight', 'acceleration', 'vehicle_width', 'body_type', 'vehicle_length', 'top_speed','wheelbase', 'fuel_consumption','drive_type', 'doors', 'is_metallic'
 
-We gained signficant improvements in performance using this method and we tried multiple preprocessing methods in order to compare performances (described below). In order to compare methods we used 3 fold cross validation on the training set and optimised hyperparameters using optuna, a bayesian hyperparameter optimisation library which given a grid of hyperparameters iteratively learns the optimal distribution of the hyperparameters and which prunes unpromising trials before the end of a run. We tried 30 runs for each method with Optuna. 
+We gained signficant improvements in performance using this method and we tried multiple preprocessing methods in order to compare performances (described below). In order to compare methods we used 3 fold cross validation on the training set and optimised hyperparameters using optuna, a bayesian hyperparameter optimisation library which given a grid of hyperparameters iteratively learns the optimal distribution of the hyperparameters and which prunes unpromising trials before the end of a run. We tried 30 runs for each method with Optuna. We set a large number of iterations (15000) and set the overfitting detector in order to stop training when validation loss doesn't decrease for 50 iterations. We choose to optimise the MAE loss consisting in estimating the median price in intead of the expectation. This is because in our case our dataset contains many outliers.
 
 1 - All Extras model: This method consisted of training catboost on all the above features, only dropping the extra category constructed column. We kept missing values as nans, and all text categorical features as strings as Catboost preprocesses them automatically  
   
@@ -493,4 +493,65 @@ The results can be found below:
 | 95%   |            0.423 |                         0.431 |                     0.428 |                  0.425 |                       0.425 |         0.425 |                 0.451 |        0.531 |        0.616 |
 | 99%   |            0.967 |                         0.995 |                     0.972 |                  0.944 |                       0.971 |         0.978 |                 1.1   |        1.146 |        1.996 |
 | max   |           45.584 |                        47.797 |                    47.282 |                 47.185 |                      49.541 |        43.087 |                47.003 |       51.695 |       51.03  |
+
+
+
+### Analysis of the chosen model 
+
+Hyperparameters
+Feature importance
+Performance by registration year
+Residuals vs price
+Residuals vs mileage
+Residuals vs Engine size
+Residuals vs Engine power
+Error vs Brand
+Examples of high errors
+
+
+### Reliability of the estimation:
+
+We want to know how reliable is the model's prediction. And we want to be able to give a low price and a high price to the user. In order to do this we trained 3 catboost models which estimates the median price, one which estimates the first quartile and one which estimates the third quartile. This enables us to get a range as well as an estimation. To train the q1 and q3 model we used the same hyperparameters found for q2 for the sake of simplicity.
+
+
+
+Now we can consider that the larger the range is with respect to the estimated price, the more uncertain the estimation is. Based on this idea we construct a reliability metric. We could calculate the difference between q3 and q1 normalised by the estimated price, however this measure is unbounded and therefore it is difficult to interpret for the user. Ideally we would like to have an indicator between 0 and 1 wher 1 means very reliable and 0 unreliable. 
+
+For this we can use a sigmoid function on the normalised interquartile range of the estimation. of the form 
+
+![equation(1)](https://github.com/user-attachments/assets/b688d563-87ef-45b0-966c-9edd08db4e9d)
+
+where:
+- \(q_1\) represents the first quartile estimation,
+- \(q_2\) represents the median estimation,
+- \(q_3\) represents the third quartile estimation
+- \(c\) is the value on which the sigmoid is centered,
+- \(\lambda\) (lambda) is a shape parameter controlling the sensitivity of the function.
+
+We can interpret the ratio (q3 - q1)/q2 as the size of the IQR as a percentage of the median estimation. The constant c represents the percentage size of the IQR which we consider to be a score of 0.5. Lambda determines how steep the sigmoid function is around c and how fast it gets close to 0 or 1. 
+
+If we look at the describe of the percentage size of the estimated IQR with respect to the median we see that the median uncertainty equals 15%, that means when the model estimates a price with +/- 7.5% certainty. We see that the 90th percentile equals 34%, therefore we will want the score to reach a score close to 0 at around 90%. 
+
+![image](https://github.com/user-attachments/assets/80c077f5-9348-4bc1-a0b6-f2c5b19032e5)
+
+
+We decide that we will consider a score of 0.5 when the level of uncertainty is of +/- 10% that is for c = 0.2 (20% of the median estimation).  We will consider the score reliable when the reliability score is above 75%, we will consider it unreliable when between 25% and 75%, and very unreliable when below 25%. 
+
+![reliability_score](https://github.com/user-attachments/assets/d48c99f7-9cdc-41d6-a9a4-f8aeb3c112b5)
+
+
+![boxplot_reliability_per_year](https://github.com/user-attachments/assets/b8c0589c-41c1-4e7a-b161-afd863f3f373)
+
+![reliability_by_brand](https://github.com/user-attachments/assets/b47e98a5-567a-4a81-a27b-67e013386880)
+
+
+50% of the data has a reliability below 73%. 
+
+![image](https://github.com/user-attachments/assets/02bacb5b-4818-4942-836b-0d845c6b2129)
+
+![image](https://github.com/user-attachments/assets/53f12a55-b7e2-4c2b-aa6b-bebfe79c02f6)
+
+![image](https://github.com/user-attachments/assets/45a9cf3e-6ef9-422c-8323-22e206b0f5ef)
+
+
 
