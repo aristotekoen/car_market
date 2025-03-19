@@ -7,7 +7,7 @@
 - [🤖 How Does This Work?](#-how-does-this-work)  
 - [🗺️ Context of This Project](#-context-of-this-project)  
 - [🎯 Project Goals](#-project-goals)  
-- [🕷️ Web Scraping](#--scraping)  
+- [🕷️ Web Scraping](#-scraping)  
 - [🧹 Data Cleaning](#cleaning-cf-exploratory_analysisipynb)  
 - [📊 Exploratory Data Analysis](#exploratory-analysis-cf5_exploratory_analysis_after_initial_cleanipynb)  
   - [📈 Missing Values Analysis](#1---missing-values)  
