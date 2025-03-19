@@ -303,7 +303,7 @@ Through this project we focused on three main modelling techniques:
 
 We noticed a significatively higher performance from catboost and therefore tried multiple different preprocessing techniques in order to find the most accurate method.
 
-Results below and explanation of each method after: 
+We display the main results below and then provide a description of each method. We see below that our best model achieves a mean absolute percentage error of 14.7% and a median absolute percentage error of 8.9%. You can see in the describe of the absolute percentage errors under the catboost section that in  
 
 |    | strategy                    |     MAPE |    MedAPE |     MAE |    MedAE |
 |---:|:----------------------------|---------:|----------:|--------:|---------:|
@@ -317,6 +317,28 @@ Results below and explanation of each method after:
 |  7 | linear regression           | 0.191793 | 0.122594  | 2682.94 | 1284.06  |
 |  8 | base model median           | 0.220556 | 0.122727  | 2740.67 | 1300     |
 
+
+
+If we restrict ourselves to reasonable poiunts (since the test set is full of outliers), that is prices between 2000 and 100 000 euros, model years above 2008, and engine sizes above 600cc we get a mean absolute percentage error of 10%, median absolute percentage error of 7.1% and make errors below 21.27% 90% of the time. 
+
+
+|       |   ape_drop_unpractical |
+|:------|-----------------------:|
+| count |        14368           |
+| mean  |            0.100533    |
+| std   |            0.158236    |
+| min   |            1.24249e-05 |
+| 1%    |            0.00107466  |
+| 5%    |            0.00564499  |
+| 25%   |            0.0313831   |
+| 50%   |            0.0717674   |
+| 75%   |            0.131842    |
+| 90%   |            0.21271     |
+| 95%   |            0.277772    |
+| 99%   |            0.480234    |
+| max   |           13.2074      |
+
+We chose the drop unpractical method as we did not have to significantly sacrfice performance and as it made it easier for the end user of the estimator.  
 
 #### Base model:
 
