@@ -10,7 +10,7 @@
 - [Methodology and Analyses](#-methodology-and-analyses)
 - [🕷️ Scraping](#-scraping)  
 - [🧹 Data Cleaning](#cleaning-cf-exploratory_analysisipynb)  
-- [📊 Exploratory Data Analysis](#exploratory-analysis-cf5_exploratory_analysis_after_initial_cleanipynb)  
+- [📊 Exploratory Data Analysis](#exploratory-analysis)  
   - [📈 Missing Values Analysis](#1---missing-values)  
   - [🔍 Feature Engineering](#2---analysis-of-fields-extracted-from-extras)  
   - [📊 Correlations](#6---correlations)  
@@ -37,14 +37,12 @@ This **machine learning model** estimates the price of a used car based on vario
 
 ✅ **Simply fill in the details** and click the **Predict** button to get:
 - An **estimated price** for your car 💰
-
-Coming soon:
 - A **price range** (low & high) 📈
 - A **confidence level** for accuracy 🎯
-- Analysis of the impact of the main features on your car price
+- An analysis of the impact of the main features on your car price
 
 
-## 🗺️ Context of this project:
+## 🗺️Context of this project:
 
 Determining the market value of a used car is challenging due to numerous influencing factors. In fact, the price of a used car isn't just a linear function of its mileage and engine size. Other factors such as supply and demand, condition of the car, color, fuel type, interior materials, extras, brand, model, registration year often have a strong impact on a used car's price. Given these complexities, gaining insights from data could help better understand pricing dynamics and help in making more objective estimations of a car's price.  
 
@@ -136,7 +134,7 @@ This data was very messy both in terms of the way it was stored and in terms of 
 
 We obtain a tabular dataframe with  112944 listings and 145 columns.
 
-### 📊 Exploratory Analysis (cf.5_exploratory_analysis_after_initial_clean.ipynb): 
+### 📊 Exploratory Analysis 
 
 #### 1 - Missing values: 
 
