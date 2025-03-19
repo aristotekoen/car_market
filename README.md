@@ -2,6 +2,33 @@
 
 ## 🔗 https://streamlit-app-305336925991.europe-west1.run.app/ 
 
+## 📌 Table of Contents  
+
+- [🤖 How Does This Work?](#how-does-this-work)  
+- [🗺️ Context of This Project](#context-of-this-project)  
+- [🎯 Project Goals](#project-goals)  
+- [🕷️ Web Scraping](#scraping)  
+- [🧹 Data Cleaning](#cleaning-cf-exploratory_analysisipynb)  
+- [📊 Exploratory Data Analysis](#exploratory-analysis-cf5_exploratory_analysis_after_initial_cleanipynb)  
+  - [📈 Missing Values Analysis](#1---missing-values)  
+  - [🔍 Feature Engineering](#2---analysis-of-fields-extracted-from-extras)  
+  - [📊 Correlations](#6---correlations)  
+  - [📉 Price Distribution](#4---distribution-of-the-target-variable)  
+- [⚙️ Model Training](#modelling-the-data)  
+  - [📊 Baseline Models](#base-model)  
+  - [🚀 Advanced ML Models](#catboost)  
+  - [🔧 Hyperparameter Tuning](#hyperparameters)  
+- [🎯 Model Performance](#analysis-of-the-chosen-model)  
+- [📉 Error Analysis](#error-analysis)  
+- [🛠️ Model Interpretability](#interpretability)  
+  - [🔍 Feature Importance](#feature-importances)  
+  - [📉 ICE (Individual Conditional Expectation) Plots](#ice-individual-conditional-expectation-plots)  
+  - [📊 Reliability Score Calculation](#reliability-of-the-estimation)  
+- [🚀 Deployment](#deployment)  
+- [🔍 Challenges, Limitations, and Future Improvements](#conclusion-challenges-weaknesses-and-potential-improvements)  
+- [📬 Contact](#contact)  
+
+
 ## 🤖 How does this work?  
 This **machine learning model** estimates the price of a used car based on various features such as **brand, model, mileage, registration year, engine, and more**.  
 
