@@ -1,4 +1,4 @@
-# :car: :greece: Machine Learning Based Used Car Price Estimator
+# :car: :greece: Machine Learning Based Car Price Estimator
 
 ## 🔗 https://streamlit-app-305336925991.europe-west1.run.app/ 
 
@@ -7,24 +7,24 @@
 - [🤖 How Does This Work?](#-how-does-this-work)  
 - [🗺️ Context of This Project](#%EF%B8%8Fcontext-of-this-project)  
 - [🎯 Project Goals](#-project-goals)
-- [Methodology and Analyses](#-methodology-and-analyses)
-- [🕷️ Scraping](#-scraping)  
-- [🧹 Data Cleaning](#cleaning-cf-exploratory_analysisipynb)  
-- [📊 Exploratory Data Analysis](#exploratory-analysis)  
-  - [📈 Missing Values Analysis](#1---missing-values)  
-  - [🔍 Feature Engineering](#2---analysis-of-fields-extracted-from-extras)  
-  - [📊 Correlations](#6---correlations)  
-  - [📉 Price Distribution](#4---distribution-of-the-target-variable)  
-- [⚙️ Model Training](#modelling-the-data)  
-  - [📊 Baseline Models](#base-model)  
-  - [🚀 Advanced ML Models](#catboost)  
-  - [🔧 Hyperparameter Tuning](#hyperparameters)  
-- [🎯 Model Performance](#analysis-of-the-chosen-model)  
-- [📉 Error Analysis](#error-analysis)  
-- [🛠️ Model Interpretability](#interpretability)  
-  - [🔍 Feature Importance](#feature-importances)  
-  - [📉 ICE (Individual Conditional Expectation) Plots](#ice-individual-conditional-expectation-plots)  
-  - [📊 Reliability Score Calculation](#reliability-of-the-estimation)  
+- [Methodology and Analyses](#methodology-and-analyses)
+  - [🕷️ Scraping](#%EF%B8%8F-scraping)  
+  - [🧹 Data Cleaning](#-cleaning)  
+  - [📊 Exploratory Data Analysis](#-exploratory-analysis)  
+    - [📈 Missing Values Analysis](#1---missing-values)  
+    - [🔍 Feature Engineering](#2---analysis-of-fields-extracted-from-extras)  
+    - [📊 Correlations](#6---correlations)  
+    - [📉 Price Distribution](#4---distribution-of-the-target-variable)  
+  - [⚙️ Model Training](#modelling-the-data)  
+    - [📊 Baseline Models](#base-model)  
+    - [🚀 Advanced ML Models](#catboost)  
+    - [🔧 Hyperparameter Tuning](#hyperparameters)  
+  - [🎯 Model Performance](#analysis-of-the-chosen-model)  
+  - [📉 Error Analysis](#error-analysis)  
+  - [🛠️ Model Interpretability](#interpretability)  
+    - [🔍 Feature Importance](#feature-importances)  
+    - [📉 ICE (Individual Conditional Expectation) Plots](#ice-individual-conditional-expectation-plots)  
+    - [📊 Reliability Score Calculation](#reliability-of-the-estimation)  
 - [🚀 Deployment](#deployment)  
 - [🔍 Challenges, Limitations, and Future Improvements](#conclusion-challenges-weaknesses-and-potential-improvements)  
 - [📬 Contact](#contact)  
@@ -102,7 +102,7 @@ We see that the fields are formatted in various ways, some are grouped under dic
 
 Before this however, we then used all the collected ids to scrape the ads one by one to obtain car characterstics which weren't present in the crawling on listing pages such as extras, interior types etc. This allowed us to enrich the features for each listing. 
 
-### 🧹 Cleaning (cf. exploratory_analysis.ipynb):
+### 🧹 Cleaning
 
 This data was very messy both in terms of the way it was stored and in terms of the types (no standard json type for each field within the api response meaning that each field needed to be treated with its own strategy and mixed types within various fields and floats stored as strings with both numbers and letters and special characters). The largest part of the project was spent on this stage and below are the various cleaning methods that we applied to this data.  
 
