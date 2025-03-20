@@ -1,8 +1,8 @@
 # :car: :greece: Machine Learning Based Car Price Estimator
 
-## 🔗 https://streamlit-app-305336925991.europe-west1.run.app/ 
+# 🔗 Link to Streamlit App: https://streamlit-app-305336925991.europe-west1.run.app/ 
 
-## 📌 Table of Contents  
+# 📌 Table of Contents  
 
 - [🤖 How Does This Work?](#-how-does-this-work)  
 - [🗺️ Context of This Project](#%EF%B8%8Fcontext-of-this-project)  
@@ -10,11 +10,7 @@
 - [Methodology and Analyses](#methodology-and-analyses)
   - [🕷️ Scraping](#%EF%B8%8F-scraping)  
   - [🧹 Data Cleaning](#-cleaning)  
-  - [📊 Exploratory Data Analysis](#-exploratory-analysis)  
-    - [📈 Missing Values Analysis](#1---missing-values)  
-    - [🔍 Feature Engineering](#2---analysis-of-fields-extracted-from-extras)  
-    - [📊 Correlations](#6---correlations)  
-    - [📉 Price Distribution](#4---distribution-of-the-target-variable)  
+  - [📊 Exploratory Data Analysis](#-exploratory-analysis)
   - [⚙️ Model Training](#modelling-the-data)  
     - [📊 Baseline Models](#base-model)  
     - [🚀 Advanced ML Models](#catboost)  
@@ -35,37 +31,36 @@ This **machine learning model** estimates the price of a used car based on vario
 
 📊 The model was trained on real **used car listings from Greek websites**, so the predictions reflect the **Greek market**.  
 
-✅ **Simply fill in the details** and click the **Predict** button to get:
+**Simply fill in the details** and click the **Predict** button to get:
 - An **estimated price** for your car 💰
 - A **price range** (low & high) 📈
 - A **confidence level** for accuracy 🎯
-- An analysis of the impact of the main features on your car price
+- An analysis of the **effect of the main features on your car price** 📊
 
 
-## 🗺️Context of this project:
+## 🗺️ Context of this project:
 
 Determining the market value of a used car is challenging due to numerous influencing factors. In fact, the price of a used car isn't just a linear function of its mileage and engine size. Other factors such as supply and demand, condition of the car, color, fuel type, interior materials, extras, brand, model, registration year often have a strong impact on a used car's price. Given these complexities, gaining insights from data could help better understand pricing dynamics and help in making more objective estimations of a car's price.  
 
-There are numerous car listing websites on the Greek market and I aim to leverage one of these platforms where sellers list their vehicles characteristics, and buyers can reach out to them.
+There are numerous car listing websites on the Greek market and we aim to leverage one of these platforms where sellers list their vehicles characteristics, and buyers can reach out to them.
 
 After a two-year break from data science, this project serves as a hands-on opportunity to refresh and update my skills. The main technical focus areas include:
 
-    Web Scraping & Data Storage – Extracting and storing information from websites via api requests or html code 
+    Web Scraping & Data Storage – Extracting and storing information from the web via apis or html code 
     Data Preprocessing & Exploratory Analysis – Extracting meaningful insights from real raw data.
     Machine Learning for Price Prediction – Building and evaluating pricing models.
-    Implementing a RAG-based Chatbot – Exploring state-of-the-art retrieval-augmented generation techniques.
-    Applying deep learning for feature extraction.
-
+    Implementing a RAG-based Chatbot – Exploring state-of-the-art retrieval-augmented generation techniques. (coming soon)
+    Applying deep learning for feature extraction. (coming soon)
 
 
 ## 🎯 Project Goals
 
 To explore these challenges, I aim to: 
 
-      🕷️ Scrape and store all published used car listings  
-      🧹 Clean and preprocess the listings to create a dataset representative of today's Greek market 
-      📊 Analyze the data to gain insights and gain a better understanding of the data
-      ⚙️ Use machine learning to train a car estimation model, comparing multiple preprocessing and modelling techniques and optimising parameters
+      💾 Gather and store all published used car listings  
+      🧹 Extract, clean and preprocess the listings to create a dataset representative of today's Greek market 
+      📊 Analyze the data to gain insights and a better understanding of the dataset
+      ⚙️ Use machine learning to train a car estimation model, comparing multiple preprocessing and modelling techniques and optimising performance
       🚀 Deploy the model using a containerized Streamlit app on Google Cloud Run
 
 Next steps: 
@@ -77,15 +72,15 @@ Next steps:
 
 ## Methodology and Analyses:
 
-### 🕷️ Scraping
+### 💾 Scraping
 
-The first step consisted in scraping the ads from the chosen website. When looking at the car listing in web developer mode in my browser, the displayed content of the listings was extracted from the response to an api request in the form of a large json file of around 3000 rows with various information about the listing. We can find links to the pictures, informations about the seller, dates of publishing and modifications, extras of the car, main characteristics and many other fields. Below is a screenshot of a small section of such a record:
+The first step consisted in scraping car listing from the web through identified apis. When looking at car listing in web developer mode in my browser, the displayed content of the listings was extracted from the response to an api request in the form of a large json file of around 3000 rows with various information about the listing. We can find links to the pictures, informations about the listing, dates of publishing and modifications, extras of the car, main characteristics and many other fields. Below is a screenshot of a small section of such a record:
 
 ![image](https://github.com/user-attachments/assets/8ca75dc0-ac6d-4b4d-ae62-f667a13fcbb3)
 
 There are many fields which aren't relevant to our use case, so the first step was to list the keys of the json which interested us. 
 
-Each car listing has an id and we wish to extract all the car listings. So the next step was to find a way to get all the ids on the website. To do this, we use a search on the website without any filter which leads us to the paginated list of all ads. This information was also the result of an api request. For each page of size n_listings, an api request is made to the page number and a json with the n_listings listed on the page are returned. What was useful is that these jsons were much smaller and contained the main characteristics of the listed cars with their ids.
+Each car listing has an id and we wish to extract all the car listings. So the next step was to find all the ids on the website. To do this, we use a search on the website without any filter which leads to a paginated list of all ads. This information was also the result of an api request. For each page of size n_listings, an api request is made to the page number and a json with the n_listings listed on the page are returned. What was useful is that these jsons were much smaller and contained the main characteristics of the listed cars with their ids.
 
 So the methodology to scrape the data was the following: 
 
@@ -98,51 +93,53 @@ At this stage we get a dataframe with columns containing lists of mixed types or
 
 ![image](https://github.com/user-attachments/assets/c9024264-d3c8-49e3-b0cc-13e3abbdb62e)
 
-We see that the fields are formatted in various ways, some are grouped under dictionnaries with multiple keys, the price is stored as a string with a space between thousands and the EUR sign, mileage is a string with KM sign. That is what we will come to treat in the next section: cleaning and processing. 
+We see that the fields are formatted in various ways, some are grouped under dictionnaries with multiple keys, the price is stored as a string with a space between thousands and the EUR sign, mileage is a string with KM sign. That is what we will come to treat in the next section (Cleaning). 
 
-Before this however, we then used all the collected ids to scrape the ads one by one to obtain car characterstics which weren't present in the crawling on listing pages such as extras, interior types etc. This allowed us to enrich the features for each listing. 
+Before this however, we then used all the collected ids to scrape the ads one by one to obtain car characterstics which weren't present in the crawling on listing pages such as extras, interior types etc. This allowed us to enrich the data with additional features for each car ad. 
 
 ### 🧹 Cleaning
 
-This data was very messy both in terms of the way it was stored and in terms of the types (no standard json type for each field within the api response meaning that each field needed to be treated with its own strategy and mixed types within various fields and floats stored as strings with both numbers and letters and special characters). The largest part of the project was spent on this stage and below are the various cleaning methods that we applied to this data.  
+This data was messy and inconsistent considering the way it was stored and the types (no standard json type for each field within the api response, meaning that each field had to be treated with a custom strategy. Presence of mixed types within various fields, floats stored as strings with both numbers and letters and special characters). The largest part of the project was spent on this stage and below are the various cleaning methods that we applied to this data.  
 
 
 ✔️ Extracted all possible extras in order to convert extras from a list of jsons each representing the mention of an extra to one boolean column per extra (example: air_conditioning: True or False)  
 ✔️ Extracted all possible specifications to convert specifications from one json with mentioned specifications to one column per specification containing their respective values (example fuel_type: petrol)  
 ✔️ Extracted all possible trim levels to convert model trim column from a json with mentioned trim specs to one column per trim spec (example one column doors: number of doors) for each listing  
-✔️ Extract description and store it in one columns  
+✔️ Extract description and store it in one column for NLP applications
 ✔️ Deduplicated ads, some listings which were listed with paid priority would appear multiple times on the website so we had to keep only one listing per id  
-✔️ We drop over 40 unnecessary columns (leasing, marketplace, seo, finance options etc.)   
-✔️ We process geolocation json to extract latitude longitude  
-✔️ Convert mileage from a string of the form 15 000 KM to float using regex  
-✔️ Extract battery charge time, fuel type, engine power, gearbox type, features, engine size, battery range from key feature dictionnaries  
-✔️ Extract Brand, model, variant, registration year from dictionnary  
-✔️ Convert engine size from 1200 cc/375kW/1000 W to float  
-✔️ Convert dates to datetime  
-✔️ Deduplicate redudant columns (some columns were redundant as extracted from different sections of the json)  
-✔️ Remove columns with constant values for all listings  
-✔️ Convert battery range from 400 km or 400 χλμ to a float via regex  
-✔️ Convert battery charge time from 7 ωρες το an integer  
-✔️ Translate from Greek to English, Map and Merge redundant category levels for multiple features (fuel type, gearbox_type, interior type, exterior color, interior color etc.). We encountered multiple features such as fuel type where the levels were stored both in English or in Greek within the same column. For example we would have some cars with fuel type Πετρελαιο and some with Diesel. We merged each level together for these columns.   
-✔️ Convert year column stored as double digit string in the form 00 for 2000 and 92 for 1992 to the 4 digit year  
-✔️ Extract the information Μεταλλικο regarding exterior color to store it as a boolean feature is_metallic  
-✔️ Convert emissions Co2 from 98 g/km to float  
-✔️ Convert rim size from 17 inches or 17 ιντσες to integer.  
-✔️ Fill missing co2 emission values for electric cars to 0  
-✔️ Merge inconsistent category levels of body type (Bus with Van and van ) which all consered mini vans  
-✔️ Drop listings without a price  
-
-We obtain a tabular dataframe with  112944 listings and 145 columns.
+✔️ Droppped over 40 unnecessary columns (leasing, marketplace, seo, finance options etc.)   
+✔️ Processed geolocation json to extract latitude longitude  
+✔️ Converted mileage from a string of the form 15 000 KM to float using regex  
+✔️ Extracted battery charge time, fuel type, engine power, gearbox type, features, engine size, battery range from key feature dictionnaries  
+✔️ Extracted Brand, model, variant, registration year from dictionnary  
+✔️ Converted engine size from 1200 cc/375kW/1000 W to float  
+✔️ Converted dates to datetime  
+✔️ Deduplicated redudant columns (some columns were redundant as extracted from different sections of the json)  
+✔️ Removed columns with constant values for all listings  
+✔️ Converted battery range from 400 km or 400 χλμ to a float via regex  
+✔️ Converted battery charge time from 7 ωρες το an integer  
+✔️ Translated from Greek to English, Mapped and Merged redundant category levels for multiple features (fuel type, gearbox_type, interior type, exterior color, interior color etc.). We encountered multiple features such as fuel type where the levels were stored both in English or in Greek within the same column. For example we would have some cars with fuel type Πετρελαιο and some with Diesel. We merged each level together for these columns.   
+✔️ Converted year column stored as double digit string in the form 00 for 2000 and 92 for 1992 to the 4 digit year  
+✔️ Extracted the information Μεταλλικο regarding exterior color to store it as a boolean feature is_metallic  
+✔️ Converted emissions Co2 from 98 g/km to float  
+✔️ Converted rim size from 17 inches or 17 ιντσες to integer.  
+✔️ Filled missing co2 emission values for electric cars to 0  
+✔️ Merged inconsistent category levels of body type (Bus with Van and van ) which all consered mini vans  
+✔️ Dropped listings without a price  
 
 ### 📊 Exploratory Analysis 
 
-#### 1 - Missing values: 
+#### Dimensions:
+
+We obtain a tabular dataframe with  112944 listings and 145 features
+
+#### Missing values: 
 
 We notice some features with very low level of completion <50% such as vehicle dimensions, performance features such as torque, technical check up, battery related information and co2 emissions. Also, we see the extra features all with the same level of completion, this is because when the json containing extras was present we set to true the extras contained in it and to false the ones not mentionned. Therefore all extras are set to NaN for listings which did not contain a json with extras.
 
 ![completude](https://github.com/user-attachments/assets/1682b5b6-d858-4eee-a2a9-d1e1a45549c2)
 
-#### 2 - Analysis of fields extracted from extras: 
+#### Analysis of fields extracted from extras: 
 
 The json response from car ads contains a json with the mentioned extras in the car. We have 85 possible extras for each car, that is a very large number of features and we want to see if certain extras are really useful or present in the dataframe. 
 
@@ -162,7 +159,7 @@ What we see:
 ![boxplot_extras](https://github.com/user-attachments/assets/869b8479-b682-49af-a6fe-1dfae5613b3b)
 
 
-#### 3 - Describe of main numerical variables:
+#### Describe of main numerical variables:
 
 On the describe of the main numerical variables below we notice a high presence of outliers which led us to investigate these cases, it turns out that the dataset contains many abnormal ads:
 
@@ -194,7 +191,7 @@ On the describe of the main numerical variables below we notice a high presence 
 
 We see that we will need to apply some rules based on domain knowledge in order to fix some of these issues as well as maybe try an outlier removal technique in order to remove certain abnormal points. 
 
-#### 4 - Distribution of the target variable:
+#### Distribution of the target variable:
 
 Here we plot the histogram, box plot of our target variable:
 
@@ -323,13 +320,17 @@ The disadvantages of this method is that we loose interpretability about the imp
 
 Through this project we focused on three main modelling techniques:
 
-* One base model consisting in grouping the data and estimating the median price per group and using this median price as the predicted value
-* An improvement on the base model consisting in fitting on linear regression per group and using the respective fitted regression to predict the value of the car
-* Gradient boosting, using catboost which is ideal for tabular data with high cardinality categorical features and missing values
+* A **base model** consisting in grouping the training data and estimating the median price per group
+* An improvement on the base model, fitting **linear regression on groups** within the training set and using the corresponding fitted regression to predict the value of a car given its group
+* A **gradient boosting** model, catboost which is ideal for tabular data with categorical features with high carinality and missing values
 
-We noticed a significatively higher performance from catboost and therefore tried multiple different preprocessing techniques in order to find the most accurate method.
+We noticed significatively higher performance from catboost and tried multiple different preprocessing techniques in order to find the most accurate method.
 
-We display the main results below and then provide a description of each method. We see below that our best model achieves a mean absolute percentage error of 14.7% and a median absolute percentage error of 8.9%. You can see in the describe of the absolute percentage errors under the catboost section that in  
+The data was split in a training and test set with an 80/20 ratio. 3 Fold cross validation was used to train and validate catboost models. 
+
+We display the main results below and then provide a description of each method. 
+
+We see on the table below that our chosen model (**caboost drop unpractical**) achieves a mean absolute percentage error of **14.7%** and a median absolute percentage error of **8.9%**.
 
 |    | strategy                    |     MAPE |    MedAPE |     MAE |    MedAE |
 |---:|:----------------------------|---------:|----------:|--------:|---------:|
@@ -345,7 +346,7 @@ We display the main results below and then provide a description of each method.
 
 
 
-If we restrict ourselves to reasonable poiunts (since the test set is full of outliers), that is prices between 2000 and 100 000 euros, model years above 2008, and engine sizes above 600cc we get a mean absolute percentage error of 10%, median absolute percentage error of 7.1% and make errors below 21.27% 90% of the time. 
+We previously saw that the data contained multiple outliers even after cleaning obvious abnormalities. If we restrict ourselves to more reasonable points, that is prices between 2000 and 100 000 euros, model years above 2008, and engine sizes above 600cc we observe a mean absolute percentage error of 10%, median absolute percentage error of 7.1% and errors below 21.27% 90% of the time as shown on the table below.
 
 
 |       |   ape_drop_unpractical |
@@ -364,25 +365,25 @@ If we restrict ourselves to reasonable poiunts (since the test set is full of ou
 | 99%   |            0.480234    |
 | max   |           13.2074      |
 
-We chose the drop unpractical method as we did not have to significantly sacrfice performance and as it made it easier for the end user of the estimator.  
+We chose the **drop unpractical** method as it made it easier for the end user of the estimating tool and as it did not imply to significantly sacrfice performance with respect to the other methods.  
 
 #### Base model:
 
-We first try a simple estimation method, grouping cars in three levels:
+We first try a simple estimation method, grouping cars in three granularity levels:
 
 * By brand, model , year
 * By brand, model
 * By brand, year
 * By brand
 
-For each car to predict we find its corresponding group in the training set at the most granular level first (by brand, model, year). If there are enough points in the group (greater than a fixed threshold) we estimate the price as the median price of the corresponding group in the training set. If the number of points in the training set is lower than the set threshold, we move to a group level with less granularity.
+For each car to estimate in the test set we find its corresponding most granular group in the training set first (by brand, model, year). If there are enough points in the group (greater than a fixed threshold) we estimate the price as the median price of the corresponding group in the training set. If the number of points in the group is lower than the set threshold, we move to a group level with less granularity.
 
 The value of the threshold is a hyperparameter here. For a value of 1, the model will fit the training data to the finest level in every case. The higher the threshold, the harder it will be for a car to be estimated based on the finest level and therefore we risk underfitting. Below we will plot the mean absolute percentage error on the test set with respect to different thresholds. 
 
 ![group_median_thresh](https://github.com/user-attachments/assets/b39cdbc9-a64d-45e3-a32e-4ed7b197b050)
 
 
-With a threshold of 1 we obtain a mean absolute percentage error of 22%. Below is a describe of the residuals, absolute residuals and absolute percentage errors. We see that in median the absolute pct error is of 12.2%
+With a threshold of 1 we obtain a mean absolute percentage error of 22%. Below is a describe of the residuals, absolute residuals and absolute percentage errors. We see that in median the absolute percentage error is of 12.2%
 
 |       |   residuals_median |   abs_residuals_median |     ape_median |
 |:------|-------------------:|-----------------------:|---------------:|
@@ -401,16 +402,27 @@ With a threshold of 1 we obtain a mean absolute percentage error of 22%. Below i
 | 99%   |          20500     |               24601    |     1.99615    |
 | max   |         203074     |              203074    |    51.0301     |
 
-Advantage of the mode: simple approach, easily interpretable
-Disadvantage: We fail to take important charactersitics of the cars into account such as engine specs within a model, extras, mileage. If we look at examples  with the largest errors below, we make errors on cars with high mileage since this is not taken into account. Also we notice large errors due to outliers, we see some cars with a description mentioning this is a leasing with the price being the monthly dose, we also see cars being sold for spare parts, or an ad concerning an engine with 250 000 km being sold. 
+✅ Advantages of this model: 
+ 
+  *simple approach
+  *easily interpretable
+
+❌ Disadvantages of this model: 
+
+* Important charactersitics of the cars aren't taken into account (engine specs within a model, extras, gearbox type)
+* Very dependent on the representation of car models in the data
+* Problematic when a brand has a wide range of models from budget options to high end options (in the case where we have to estimate the price at the brand level for example)
+
+  
+When looking at examples  with the largest errors below, we make errors on cars with high mileage since this is not taken into account. We also notice large errors due to outliers, judging by the descriptions, some cars are posted for leasing with the mentionned price being the monthly dose. We see cars being sold for spare parts and an ad where the user sells only the engine with 250 000 km and mentions the mileage as 0. 
 
 ![image](https://github.com/user-attachments/assets/307ce0b7-296d-4a7e-878d-9668c485bd80)
 
-We see that based on the granularity of the group on which the price was estimated, the finer the group the better the estimation:
+Below we plot the mean absolute percentage error on the test set based on the group threshold and we see that the finer the group, the better the estimation:
 
 ![image](https://github.com/user-attachments/assets/ac9b4fda-8597-44d4-a6aa-f29dd48be6a8)
 
-We also see much higher errors on crashed cars.
+We also see that the model peforms badly on crashed cars, this is logical considering our approach.
 
 ![image](https://github.com/user-attachments/assets/6cd0b616-f376-4b15-a8f7-16ab74a5c71d)
 
@@ -418,24 +430,26 @@ We also see much higher errors on crashed cars.
 
 #### Grouped Linear Regression:
 
-We then try a similar approach but using linear regression. We observed linear relationships between the price of a car and certain features in the exploratory analysis. So linear regression seems like an adequate method in order to model the data. However, we also saw that these linearities appeared on groups. So in this method we again group the data. Since we saw a linear relationship with the registration year in our analysis we will use this feature as one of the independent variables in our model. That is why in this method we group in the following way:
+We then try a similar approach with linear regression. 
+
+We observed during the exploratory analysis linear relationships between the price of a car (log transformed) and certain features. So linear regression seems like an adequate method to explore in order to model our data. 
+
+However, we also saw that these linearities appeared on groups and will therefore have to group the data again. Since we saw a linear relationship with the registration year we will use this feature as one of the independent variables. That is why in this method we group the listings in the following way:
 
 * By brand and model
 * By brand
 
-We model the price of the car as a linear regression with respect to mileage, engine_size, registration_year, crashed, is_new. We did not include the engine power as we saw that engine power and size are highly correlated, something which goes against linear regression assumptions. 
+We model the price of the car as a linear regression with respect to mileage, engine_size, registration_year, crashed. We did not include the engine power as we saw that engine power and size are highly correlated, something which goes against linear regression assumptions. We did not include extras, interior or exterior colors and types as these variables had a large percentage of missing values.
 
-If we look at the fitted linear regression on the group Citroen C3:
+Let's take a look at the fitted linear regression on the group Citroen C3:
 
-We see a well conditioned covariance matrix, statistically significant estimated coefficients with respect to the p value for each coefficient. We see that the most impactful variable is the registration year which has a positive impact on the price, then we see that the mileage and the is_crashed variable affect negatively the price of the car and that the engine size impacts the price positively. We see an adjusted R2 of 0.89 meaning that our model captures most of the variance in the model effectively. 
+We see a well conditioned covariance matrix, statistically significant estimated coefficients with respect to the p value for each coefficient. We see that the most impactful variable is the registration year with a positive effect on the price, then we see that the mileage and the is_crashed variables affect the price negatively and finally the engine size which also impacts the price positively. We see an adjusted R2 of 0.89 meaning that our model captures most of the variance in the model. 
 
-We had to scale the features as otherwise we would encounter ill conditioned covariance matrices leading to instabilities. We also took the log of the price for fitting the regressions as we saw that the linear relationships were stronger when looking at the logarithm.
-
-
+In this approach we scaled the features as otherwise we encountered ill conditioned covariance matrices leading to instabilities. We also took the log transformation of the price for fitting the regressions as we saw that the linear relationships were stronger when looking at the logarithm.
+  
 ![image](https://github.com/user-attachments/assets/1bf22ac4-6cc1-4043-bf6e-972038974bce)
-
-
-We split the training in order to get a validation set and see which threshold minimises the error. We estimate that 15 is the ideal threshold: 
+  
+We split the training set in order to get a validation set and experiment with thresholds to see which one minimises the error. We estimate that 15 is the ideal threshold: 
 
 ![threshold_linreg](https://github.com/user-attachments/assets/645dff8b-c61a-41c3-9f79-063ce474fb58)
 
@@ -456,7 +470,7 @@ After refitting the regressions on the whole training set these are the results 
 | 99%   |     1.14574     |
 | max   |    51.6949      |
 
-We had to use a threshold of 20 as instabilities were encountered using 15 on the whole training set. We observe an improvement with respect to the base model both in mean and median. 
+We had to use a threshold of 20 however as instabilities were encountered using 15 on the whole training set. We observe an improvement with respect to the base model both in mean and median. 
 
 We notice better estimations when the regressions are able to be fitted at the model level rather than at the brand stage:
 
@@ -470,24 +484,44 @@ Residuals seem to be normally distributed
 
 ![image](https://github.com/user-attachments/assets/c883fcaf-5499-4b15-a856-812706df399f)
 
+✅ Advantages of this model: 
+ 
+  * simple approach
+  * easily interpretable
+  * Leveraging linear relationships within the data
 
-#### Catboost
+❌ Disadvantages of this model: 
 
-As we saw with the base model and the linear regression we were forced to fit models on groups of cars using model and brand and sometimes registration year. The problem encountered with these methods were that for groups with very few observations we could not fit a model on the desired level of group granularity and therefore had to fit the model on a broader group (for example a porsche 918 would have to be estimated using a regression fitted on all porsches since there weren't enough of these cars in the dataset. This lead to worse estimations for car models which are not present enough in the dataset.
+* We couldn't include all our categorical variables as this would lead to a very high number of one hot encoded features
+* Imputing missing values on very sparse features is necessary and could be misleading
+* Other features such as co2 emissions or vehicle dimensions aren't necessesarily linear with the price
+* We rely on groups again, and less represented car models and years will not be estimated well
+* We store over 1000 models. Unpractical to deploy in production. For each car we wish to estimate, we might need to load a different model 
 
-Moreover, with linear regressions we were limited to using variables which displayed a somehow linear relationship with the price, however not all independent variables in our dataset have a linear relationship with the price (for example the latitude and the longitude).
 
-Ensemble methods such as Random Forests and Gradient boosting, based on fitting regression trees are still today the leading methods for tabular datasets. Their advantage is their ability to capture complex relationships, handle categorical variables efficiently while remaining very interpretable (although gradient boosted trees aren't as interpretable as compared to random forests).
+#### Gradient Boosting (Catboost)
 
-In our case gradient boosting and specifically Catboost seems like an ideal method. In fact Catboost is a gradient boosting algorithm which is tailored to datasets with sparts categorical features with high cardinality which it treats via an advanced version of target encoding (consisting of assigning the mean value of the target for each category level. It also handles missing values, treating them as a separate category.
+As we saw with the base model and the linear regression we were forced to fit models on groups of cars using model and brand and sometimes registration year. The problem encountered with these methods were that for groups with very few observations we could not fit a model on the desired level of group granularity and therefore had to fit the model on a broader group (for example a porsche 918 would have to be estimated using a regression fitted on all porsches since there weren't enough of these cars in the dataset). This lead to worse estimations for car models which are not present enough in the dataset.
 
-Some of these variables might intuitively have a great influence on the price of a car (for example the extras) however simple imputation methods for these variables would affect the structure of the data. In fact for the extras the NaN value means that we do not know if the car has this extra or not and therefore these should be  treated as a separate category. 
+Moreover, with linear regressions we were limited to using variables which displayed linear relationships with the price, however not all independent variables in our dataset have a linear relationship with the price (for example the latitude and the longitude).
 
-The main features we have at our disposal on top of the the various extras and the constructed options columns discussed before were the following: 
+Ensemble methods such as Random Forests and Gradient boosting, based on fitting regression trees are still today the leading methods for tabular datasets. The advantages of these methods are their ability to capture complex relationships, handle categorical variables efficiently while remaining interpretable (although gradient boosted trees aren't as interpretable as compared to random forests). These methods by nature split the data into groups and are more robust to outliers.
+
+Gradient boosting consists in sequentially fitting multiple shallow trees (base learners) each fitted tree is fitted on the errors of the previous one.
+
+In our case gradient boosting and specifically Catboost stands out as an ideal method. In fact Catboost is a gradient boosting algorithm which is tailored to datasets with sparse categorical features with high cardinality which it treats via an advanced version of target encoding (consisting of assigning the mean value of the target variable for each category level). It also handles missing values automatically, treating them as a separate category. Moreover Catboost support training on GPU reducing significatively the training time which is important since such models require tuning hyperparameters on large grids.
+
+Some of our categorical variables might intuitively have a great influence on the price of a car (for example the extras) however, simple imputation methods for these variables would affect the structure of the data. In fact for the extras the NaN value means that we do not know if the car has this extra or not since the users did not bother to fill the extras fields, and therefore these should be treated as a separate category. 
+
+The main features we have at our disposal on top of the the extras and the engineered options columns we discussed before were the following: 
 
 'lat', 'lon', 'is_new', 'mileage', 'crashed', 'engine_size', 'registration_month', 'registration_year', 'engine_power', 'fuel_type', 'gearbox_type', 'brand', 'model', 'interior_type', 'seats', 'kteo','exterior_color', 'number_plate_ending', 'emissions_co2', 'battery_charge_time', 'interior_color', 'rim_size', 'vehicle_height','number_of_gears', 'torque', 'gross_weight', 'acceleration', 'vehicle_width', 'body_type', 'vehicle_length', 'top_speed','wheelbase', 'fuel_consumption','drive_type', 'doors', 'is_metallic'
 
-We gained signficant improvements in performance using this method and we tried multiple preprocessing methods in order to compare performances (described below). In order to compare methods we used 3 fold cross validation on the training set and optimised hyperparameters using optuna, a bayesian hyperparameter optimisation library which given a grid of hyperparameters iteratively learns the optimal distribution of the hyperparameters and which prunes unpromising trials before the end of a run. We tried 30 runs for each method with Optuna. We set a large number of iterations (15000) and set the overfitting detector in order to stop training when validation loss doesn't decrease for 50 iterations. We choose to optimise the MAE loss consisting in estimating the median price in intead of the expectation. This is because in our case our dataset contains many outliers.
+We gained signficant improvements in performance using this method and tried multiple preprocessing methods in order to compare performances (described below). 
+
+In order to compare methods we used 3 fold cross validation on the training set and optimised hyperparameters using optuna. Optuna is a hyperparameter optimisation tool library leveraging tools such as Bayesian optimisation and given a grid of hyperparameters it iteratively learns the optimal distribution of hyperparameters while pruning unpromising trials before the end of a run. We set the number of runs to 30 for each method. We also sixed a large number of iterations (15000) and set the overfitting detector in order to stop training when the validation loss wouldn't decrease for over 50 iterations. 
+
+We choose to optimise the MAE loss (same as estimating the median price instead of the expected price). This choice was made because our dataset contains multiple outliers.
 
 1 - All Extras model: This method consisted of training catboost on all the above features, only dropping the extra category constructed column. We kept missing values as nans, and all text categorical features as strings as Catboost preprocesses them automatically  
   
