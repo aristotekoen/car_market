@@ -7,20 +7,16 @@
 - [🤖 How Does This Work?](#-how-does-this-work)  
 - [🗺️ Context of This Project](#%EF%B8%8Fcontext-of-this-project)  
 - [🎯 Project Goals](#-project-goals)
-- [Methodology and Analyses](#methodology-and-analyses)
-  - [🕷️ Scraping](#%EF%B8%8F-scraping)  
-  - [🧹 Data Cleaning](#-cleaning)  
-  - [📊 Exploratory Data Analysis](#-exploratory-analysis)
-  - [⚙️ Model Training](#modelling-the-data)  
-    - [📊 Baseline Models](#base-model)  
-    - [🚀 Advanced ML Models](#catboost)  
-    - [🔧 Hyperparameter Tuning](#hyperparameters)  
-  - [🎯 Model Performance](#analysis-of-the-chosen-model)  
-  - [📉 Error Analysis](#error-analysis)  
-  - [🛠️ Model Interpretability](#interpretability)  
-    - [🔍 Feature Importance](#feature-importances)  
-    - [📉 ICE (Individual Conditional Expectation) Plots](#ice-individual-conditional-expectation-plots)  
-    - [📊 Reliability Score Calculation](#reliability-of-the-estimation)  
+- [🕷️ Scraping](#%EF%B8%8F-scraping)  
+- [🧹 Data Cleaning](#-cleaning)  
+- [📊 Exploratory Data Analysis](#-exploratory-analysis)
+- [⚙️ Model Training](#%EF%B8%8F-modelling-the-data)  
+  - [Baseline Models](#base-model)
+  - [Grouped Linear Regression](#grouped-linear-regression)
+  - [Gradient Boosting](#gradient-boosting-catboost)   
+- [📈 Model Performance - Error Analysis](#analysis-of-the-chosen-model)
+- [🟢 Reliability Score Calculation](#reliability-of-the-estimation)  
+- [🧐 Model Interpretability](#interpretability)  
 - [🚀 Deployment](#deployment)  
 - [🔍 Challenges, Limitations, and Future Improvements](#conclusion-challenges-weaknesses-and-potential-improvements)  
 - [📬 Contact](#contact)  
@@ -68,11 +64,8 @@ Next steps:
       🤖 Chatbot using Retrieval-Augmented Generation (RAG): Enable users to query listings using natural language.
       🔍 Text-Based Behicle Condition Assessment: Fine tune a large language model for sentiment analysis on car listing descriptions
       🖼 Image-Based Feature extraction: Extract Vehicle features from car listing images by fine tuning computer vision transformers to enrich missing fields.
-  
 
-## Methodology and Analyses:
-
-### 💾 Scraping
+## 💾 Scraping
 
 The first step consisted in scraping car listing from the web through identified apis. When looking at car listing in web developer mode in my browser, the displayed content of the listings was extracted from the response to an api request in the form of a large json file of around 3000 rows with various information about the listing. We can find links to the pictures, informations about the listing, dates of publishing and modifications, extras of the car, main characteristics and many other fields. Below is a screenshot of a small section of such a record:
 
@@ -97,7 +90,7 @@ We see that the fields are formatted in various ways, some are grouped under dic
 
 Before this however, we then used all the collected ids to scrape the ads one by one to obtain car characterstics which weren't present in the crawling on listing pages such as extras, interior types etc. This allowed us to enrich the data with additional features for each car ad. 
 
-### 🧹 Cleaning
+## 🧹 Cleaning
 
 This data was messy and inconsistent considering the way it was stored and the types (no standard json type for each field within the api response, meaning that each field had to be treated with a custom strategy. Presence of mixed types within various fields, floats stored as strings with both numbers and letters and special characters). The largest part of the project was spent on this stage and below are the various cleaning methods that we applied to this data.  
 
@@ -127,7 +120,7 @@ This data was messy and inconsistent considering the way it was stored and the t
 ✔️ Merged inconsistent category levels of body type (Bus with Van and van ) which all consered mini vans  
 ✔️ Dropped listings without a price  
 
-### 📊 Exploratory Analysis 
+## 📊 Exploratory Analysis 
 
 #### Dimensions:
 
@@ -316,7 +309,7 @@ The disadvantages of this method is that we loose interpretability about the imp
 ![image](https://github.com/user-attachments/assets/4f3038a4-cec8-4d57-b8d4-920969c28978)
 
 
-### ⚙️ Modelling the data:
+## ⚙️ Modelling the data:
 
 Through this project we focused on three main modelling techniques:
 
@@ -575,7 +568,7 @@ Each of these catboost model was optimised for hyperparamets using 3 fold valida
 
 We also tried to impose monotonic constraints on extras and other features but encountered severe performance degradation as well as unstabilities. 
 
-### Analysis of the chosen model 
+## Analysis of the chosen model 
 
 #### Hyperparameters
 
@@ -737,7 +730,7 @@ We see below that large errors are on outliers with low prices. We see a car bei
 | 47957 | alfa romeo    | alfa 156     |                2002 |          1600 | θελει καποια μαζεματα το αμαξι δουλευει κανονικα ε |         700 |            2396.7  |                2.42386 |
 
 
-### Reliability of the estimation:
+## Reliability of the estimation:
 
 We want to know how reliable is the model's prediction and to be able to give a price range to the user.
   
