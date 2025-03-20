@@ -837,21 +837,27 @@ The app gets redeployed everytime code is pushed in the main branch via git acti
 
 ## Conclusion, challenges, weaknesses and potential improvements
 
-Through this project, we managed to crawl car listing websites and store them, clean and extract the data from these listings in order to create a dataset representative of the Greek used car market. We then preprocessed this data in order to train various price estimation machine learning models on the data. We explored various preprocessing techniques and identified abnormalities and challenges within this dataset. We were able to deploy a model on a streamlit app using google cloud platform and to provide uncertainty metrics to the user as well as an interpretation of the model's behaviour to the user. 
+Through this project, we managed to crawl car listing websites, store the ads, clean and extract the data from them in order to create a dataset representative of the Greek used car market. We then preprocessed the data in order to train various price estimation machine learning models on this data. We explored various preprocessing techniques and identified abnormalities and challenges within the dataset. We were able to deploy a model on a streamlit app using google cloud platform and to construct and display uncertainty metrics to the user as well as an interpretation of the model's behaviour to the user. 
 
 ### Challenges weaknesses and potential improvements:
 
-* Some models were listed at a very granular level on the website, for example mercedes A180, A 160, A200 instead of just mercedes ACLASS. The same thing is observed on various other brands with specs determining the model name such as bmws. This leads to certain models being sparse in the data set and regrouping them under the same class could have helped the model leverage the model feature more effectively
-* The condition of the car is very important and we haven't really taken that into account apart from the crashed boolean feature. In fact we saw multiple cars being sold for spare parts which had very low prices and identifying such cases could help clean the data more easily and also improve model performance. We could fine tune a transformer to classify car descriptions into Very good condition, good, normal, bad, very bad, unknown for example. We coudl also do it using the pictures by fine tuning a vision transformer. However this would require a labeled dataset, something which we did not have the time to construct for now.
-* Geolocation features weren't studied until now and it might be important to. In fact the car market could be different in different regions in greece? We did not focus on this as we assumed that prices shouldn't differ much accross the territory but this still needs to be verified
-* The Dataset was constructed from the scraping done in February. This gives us a frozen image of the car market in february 2025 and this means that model will not be able to effectively estimate car prices as precisely in a few months. In a real production environment, for the model to stay accurate and avoid data drift over time we should rescrape the website regularly and retrain the model on the new data, verifying that performance doesn't degrade over time.
+* Some models were listed at a very granular level on the website, for example mercedes A180, A 160, A200 instead of just mercedes A Class. The same thing is observed on various other brands with specs determining the model name such as BMWs. This leads to certain models being sparse in the data set and regrouping them under the same class could have helped the model leverage the model feature more effectively.
+* The condition of the car is very important and we haven't really taken that into account apart from the crashed boolean feature. In fact we saw multiple cars being sold for spare parts which had very low prices and identifying such cases could help clean the data more easily and also improve model performance. We could fine tune a transformer to classify car descriptions into Very good condition, good, normal, bad, very bad, unknown for example. We could also do it using the pictures by fine tuning a vision transformer. However this would require a labeled dataset, something which we did not have the time to construct.
+* Geolocation features weren't studied until now and it might be important. In fact the car market could be different in different regions of Greece? We did not focus on this as we assumed that prices shouldn't differ much accross the territory but this needs to be verified
+* The Dataset was constructed from the crawling run in February 2025. This gives us a frozen image of the car market in february 2025 and this means that model will not be able to effectively estimate car prices as precisely in a few months. In a real production environment, for the model to stay accurate and avoid data drift over time we should rescrape the website regularly and retrain the model on the new data, verifying that performance doesn't degrade over time.
 * We did not take the ad posting date or modification date into account as we only scraped the website once. However keeping track of ad history and price changes in a database could help take an additional temporal dimension into account which could be important. This is something we didn't take into account.
-* More advanced outlier removal strategies such as isolation forest, clustering algorithms could have been tried.
+* More advanced outlier removal strategies such as isolation forests, clustering algorithms could have been tried.
 * More advanced feature engineering techniques on extras for example or extracting additional information from text data could have been implemented.
-* More models could have been tried, for example generalised additive models seem like an ideal method as well for this type of data.
+* More models could have been experimented with, for example generalised additive models seem like a great method for this type of data.
 * Extracting features from images to enrich the data using computer vision algorithms could help impute missing data
 
 The nature of the data and the time it took to scrape, clean and preprocess it until now did not allow me to explore all these factors deep enough but it remains something that I wish to do in the future.
 
 Thank you for your attention and looking forward to any feedback, ideas or insights that you may have! 
+
+## Contact
+
+Name: Aristotelis Koen
+Email: aristotekoen@gmail.com
+Phone: +30 6975023166
 
