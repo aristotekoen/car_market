@@ -92,7 +92,7 @@ def pdp_cat(row, X_test_set, feature, models):
     fig, ax = plt.subplots(figsize=(10,8))
     ax.scatter(np.arange(df.cats.shape[0]), df.pred_q2)
     ax.fill_between(np.arange(df.cats.shape[0]), df.pred_q1, df.pred_q3, alpha=0.2, color='blue')
-    ax.set_xticks(np.arange(df.cats.shape[0]), df.cats, rotation = 60, fontsize=5)
+    ax.set_xticks(np.arange(df.cats.shape[0]), df.cats, rotation = 60, fontsize=8)
     ax.set_ylabel('Price (€)')
     ax.set_xlabel(feature)
     ax.set_title('Effect of feature {} on the estimated price'.format(feature))

@@ -1,5 +1,3 @@
-from time import monotonic
-
 import numpy as np
 import optuna
 import pandas as pd
@@ -7,8 +5,8 @@ from catboost import CatBoostRegressor, Pool
 from google.cloud import storage
 from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error
 from sklearn.model_selection import ShuffleSplit
+
 from const import low_importances
-from sklearn.preprocessing import MinMaxScaler
 
 
 def load_train_test():
