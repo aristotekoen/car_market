@@ -431,26 +431,26 @@ We also see that the model peforms badly on crashed cars, this is logical consid
 #### Grouped Linear Regression:
 
 We then try a similar approach with linear regression. 
-
-We observed during the exploratory analysis linear relationships between the price of a car (log transformed) and certain features. So linear regression seems like an adequate method to explore in order to model our data. 
-
-However, we also saw that these linearities appeared on groups and will therefore have to group the data again. Since we saw a linear relationship with the registration year we will use this feature as one of the independent variables. That is why in this method we group the listings in the following way:
-
-* By brand and model
+  
+We observed during the exploratory analysis linear relationships between the price of a car (log transformed) and certain features. So linear regression seems like an adequate method to explore in order to model our data.   
+  
+However, we also saw that these linearities appeared on groups and will therefore have to group the data again. Since we saw a linear relationship with the registration year we will use this feature as one of the independent variables. That is why in this method we group the listings in the following way:  
+  
+* By brand and model  
 * By brand
-
+  
 We model the price of the car as a linear regression with respect to mileage, engine_size, registration_year, crashed. We did not include the engine power as we saw that engine power and size are highly correlated, something which goes against linear regression assumptions. We did not include extras, interior or exterior colors and types as these variables had a large percentage of missing values.
-
-Let's take a look at the fitted linear regression on the group Citroen C3:
-
-We see a well conditioned covariance matrix, statistically significant estimated coefficients with respect to the p value for each coefficient. We see that the most impactful variable is the registration year with a positive effect on the price, then we see that the mileage and the is_crashed variables affect the price negatively and finally the engine size which also impacts the price positively. We see an adjusted R2 of 0.89 meaning that our model captures most of the variance in the model. 
-
-In this approach we scaled the features as otherwise we encountered ill conditioned covariance matrices leading to instabilities. We also took the log transformation of the price for fitting the regressions as we saw that the linear relationships were stronger when looking at the logarithm.
   
+Let's take a look at the fitted linear regression on the group Citroen C3:  
+  
+We see a well conditioned covariance matrix, statistically significant estimated coefficients with respect to the p value for each coefficient. We see that the most impactful variable is the registration year with a positive effect on the price, then we see that the mileage and the is_crashed variables affect the price negatively and finally the engine size which also impacts the price positively. We see an adjusted R2 of 0.89 meaning that our model captures most of the variance in the model.  
+  
+In this approach we scaled the features as otherwise we encountered ill conditioned covariance matrices leading to instabilities. We also took the log transformation of the price for fitting the regressions as we saw that the linear relationships were stronger when looking at the logarithm.  
+    
 ![image](https://github.com/user-attachments/assets/1bf22ac4-6cc1-4043-bf6e-972038974bce)
-  
+   
 We split the training set in order to get a validation set and experiment with thresholds to see which one minimises the error. We estimate that 15 is the ideal threshold: 
-
+  
 ![threshold_linreg](https://github.com/user-attachments/assets/645dff8b-c61a-41c3-9f79-063ce474fb58)
 
 
@@ -484,13 +484,13 @@ Residuals seem to be normally distributed
 
 ![image](https://github.com/user-attachments/assets/c883fcaf-5499-4b15-a856-812706df399f)
 
-✅ Advantages of this model: 
+✅ **Advantages of this model: **
  
   * simple approach
   * easily interpretable
   * Leveraging linear relationships within the data
 
-❌ Disadvantages of this model: 
+❌ **Disadvantages of this model: **
 
 * We couldn't include all our categorical variables as this would lead to a very high number of one hot encoded features
 * Imputing missing values on very sparse features is necessary and could be misleading
@@ -501,42 +501,57 @@ Residuals seem to be normally distributed
 
 #### Gradient Boosting (Catboost)
 
-As we saw with the base model and the linear regression we were forced to fit models on groups of cars using model and brand and sometimes registration year. The problem encountered with these methods were that for groups with very few observations we could not fit a model on the desired level of group granularity and therefore had to fit the model on a broader group (for example a porsche 918 would have to be estimated using a regression fitted on all porsches since there weren't enough of these cars in the dataset). This lead to worse estimations for car models which are not present enough in the dataset.
-
-Moreover, with linear regressions we were limited to using variables which displayed linear relationships with the price, however not all independent variables in our dataset have a linear relationship with the price (for example the latitude and the longitude).
-
-Ensemble methods such as Random Forests and Gradient boosting, based on fitting regression trees are still today the leading methods for tabular datasets. The advantages of these methods are their ability to capture complex relationships, handle categorical variables efficiently while remaining interpretable (although gradient boosted trees aren't as interpretable as compared to random forests). These methods by nature split the data into groups and are more robust to outliers.
-
-Gradient boosting consists in sequentially fitting multiple shallow trees (base learners) each fitted tree is fitted on the errors of the previous one.
-
-In our case gradient boosting and specifically Catboost stands out as an ideal method. In fact Catboost is a gradient boosting algorithm which is tailored to datasets with sparse categorical features with high cardinality which it treats via an advanced version of target encoding (consisting of assigning the mean value of the target variable for each category level). It also handles missing values automatically, treating them as a separate category. Moreover Catboost support training on GPU reducing significatively the training time which is important since such models require tuning hyperparameters on large grids.
-
-Some of our categorical variables might intuitively have a great influence on the price of a car (for example the extras) however, simple imputation methods for these variables would affect the structure of the data. In fact for the extras the NaN value means that we do not know if the car has this extra or not since the users did not bother to fill the extras fields, and therefore these should be treated as a separate category. 
-
-The main features we have at our disposal on top of the the extras and the engineered options columns we discussed before were the following: 
-
-'lat', 'lon', 'is_new', 'mileage', 'crashed', 'engine_size', 'registration_month', 'registration_year', 'engine_power', 'fuel_type', 'gearbox_type', 'brand', 'model', 'interior_type', 'seats', 'kteo','exterior_color', 'number_plate_ending', 'emissions_co2', 'battery_charge_time', 'interior_color', 'rim_size', 'vehicle_height','number_of_gears', 'torque', 'gross_weight', 'acceleration', 'vehicle_width', 'body_type', 'vehicle_length', 'top_speed','wheelbase', 'fuel_consumption','drive_type', 'doors', 'is_metallic'
-
-We gained signficant improvements in performance using this method and tried multiple preprocessing methods in order to compare performances (described below). 
-
-In order to compare methods we used 3 fold cross validation on the training set and optimised hyperparameters using optuna. Optuna is a hyperparameter optimisation tool library leveraging tools such as Bayesian optimisation and given a grid of hyperparameters it iteratively learns the optimal distribution of hyperparameters while pruning unpromising trials before the end of a run. We set the number of runs to 30 for each method. We also sixed a large number of iterations (15000) and set the overfitting detector in order to stop training when the validation loss wouldn't decrease for over 50 iterations. 
-
-We choose to optimise the MAE loss (same as estimating the median price instead of the expected price). This choice was made because our dataset contains multiple outliers.
-
-1 - All Extras model: This method consisted of training catboost on all the above features, only dropping the extra category constructed column. We kept missing values as nans, and all text categorical features as strings as Catboost preprocesses them automatically  
+As we saw with the base model and the linear regression we were forced to fit models on groups of cars using model and brand and sometimes registration year. The problem encountered with these methods were that for groups with very few observations we could not fit a model on the desired level of group granularity and therefore had to fit the model on a broader group (for example a porsche 918 would have to be estimated using a regression fitted on all porsches since there weren't enough of these cars in the dataset). This lead to worse estimations for car models which are not present enough in the dataset.  
   
-2 - Options model: This method consists of keeping all features above but dropping the boolean extras columns. The extras are therefore taken into account with the constructed options columns discussed before 
+Moreover, with linear regressions we were limited to using variables which displayed linear relationships with the price, however not all independent variables in our dataset have a linear relationship with the price (for example the latitude and the longitude).  
+  
+Ensemble methods such as Random Forests and Gradient boosting, based on fitting regression trees are still today the leading methods for tabular datasets. The advantages of these methods are their ability to capture complex relationships, handle categorical variables efficiently while remaining interpretable (although gradient boosted trees aren't as interpretable as compared to random forests). These methods by nature split the data into groups and are more robust to outliers.  
+  
+Gradient boosting consists in sequentially fitting multiple shallow trees (base learners) each fitted tree is fitted on the errors of the previous one.  
+  
+In our case gradient boosting and specifically Catboost stands out as an ideal method. In fact Catboost is a gradient boosting algorithm which is tailored to datasets with sparse categorical features with high cardinality which it treats via an advanced version of target encoding (consisting of assigning the mean value of the target variable for each category level). It also handles missing values automatically, treating them as a separate category. Moreover Catboost support training on GPU reducing significatively the training time which is important since such models require tuning hyperparameters on large grids.  
+  
+Some of our categorical variables might intuitively have a great influence on the price of a car (for example the extras) however, simple imputation methods for these variables would affect the structure of the data. In fact for the extras the NaN value means that we do not know if the car has this extra or not since the users did not bother to fill the extras fields, and therefore these should be treated as a separate category.  
+  
+The main features we have at our disposal on top of the the extras and the engineered options columns we discussed before were the following:  
+  
+'lat', 'lon', 'is_new', 'mileage', 'crashed', 'engine_size', 'registration_month', 'registration_year', 'engine_power', 'fuel_type', 'gearbox_type', 'brand', 'model', 'interior_type', 'seats', 'kteo','exterior_color', 'number_plate_ending', 'emissions_co2', 'battery_charge_time', 'interior_color', 'rim_size', 'vehicle_height','number_of_gears', 'torque', 'gross_weight', 'acceleration', 'vehicle_width', 'body_type', 'vehicle_length', 'top_speed','wheelbase', 'fuel_consumption','drive_type', 'doors', 'is_metallic'
+  
+We gained signficant improvements in performance using this method and tried multiple preprocessing methods in order to compare performances (described below).  
+  
+In order to compare methods we used 3 fold cross validation on the training set and optimised hyperparameters using optuna. Optuna is a hyperparameter optimisation tool library leveraging tools such as Bayesian optimisation and given a grid of hyperparameters it iteratively learns the optimal distribution of hyperparameters while pruning unpromising trials before the end of a run. We set the number of runs to 30 for each method. We also sixed a large number of iterations (15000) and set the overfitting detector in order to stop training when the validation loss wouldn't decrease for over 50 iterations. 
+  
+We choose to optimise the MAE loss (same as estimating the median price instead of the expected price). This choice was made because our dataset contains multiple outliers.  
+  
+**1 - All Extras model**: This method consisted of training catboost on all the above features, only dropping the options constructed columns. We kept missing values as nans, and all text categorical features as strings as Catboost preprocesses them automatically  
+  
+**2 - Options model**: This method consists of keeping all features above but dropping the boolean extras columns. The extras are therefore taken into account through the constructed options columns discussed before 
 
-3 - Outlier removal: Then we constructed a method to remove outliers. In order to do this we clean outliers on the price, the engine size  and the engine power using the interquartile range method. We only remove outliers on the training set and evaluate the performance on the whole test set. For the price we removed outliers on the log transformed price as the price itself wasn't symmetric. For the price we detect abnormal prices on groups and thresholds again. We first group at the most granular levels, for groups with over 40 points, we compute the bounds of the interquartile range and remove values outside of it beyond 1.5 times above and below.  For the groups with less than 40 points we compute the IQR on a group by at the brand and model level. Then for the remaining groups we use the brand level. and for the remaining groups we compute bounds on the whole set.   
+**3 - Outlier removal**:  We constructed a method to remove outliers. In order to do this we clean outliers on the **price**, the **engine size**  and the **engine power** using the **interquartile range method**. We only remove outliers on the training set and evaluate the performance on the whole test set. For the **price** we removed outliers on the **log transformed price** as the price itself wasn't symmetric and we detect abnormal prices on groups and thresholds again. We first group at the most granular levels, for groups with over 40 points, we compute the bounds of the interquartile range and remove values outside of it (beyond 1.5 times above and below bounds).  For the groups with less than 40 points we regroup them at a less granular level (brand and model) and compute the IQR on the groups. Then for the remaining groups with less than 40 points we use the brand level. and for the remaining groups we compute bounds on the whole set. For the engine size and power we use IQR on the whole set without grouping. For each row we evaluate if it is an outlier with respect to each of the three features. If a row is an outlier with respect to at least one of them we delete it. This represented 6% of the data approximately.   
 
-4 - Drop unpractical: Keeping a product oriented mindset. We drop features which make the estimation too complicated for the end user. In fact, it would be very tedious each time a user wants to estimate a car to know the acceleration, torque, vehicle dimensions, weight, number of gears, co2 emissions for each model. So we try to restrict the features to the extras and to the main characteristics which a user is expected to know. Also, we know that the dropped features are highly correlated to  the car model, year and engine size in general. And we saw when looking at the feature importances of catboost on all features that in  these very specific characteristics were scoring low. 
+**4 - Drop unpractical**: Keeping a product oriented mindset, we drop features which make the estimation tool too complicated to use for the end user. In fact, it would be very tedious for each estimation of a car to know the acceleration, torque, vehicle dimensions, weight, number of gears, co2 emissions. So we try to restrict the features to the extras and to the main characteristics which a user is expected to know. Also, we know that the dropped features are highly correlated to  the car model, year and engine size in general. And when looking at the feature importances of catboost on all features we saw that these very specific characteristics were scoring low. 
 
-5 - Drop low importance: We fit a catboost model by dropping all feature importances of the all extras model lower than a certain threshold.  
+**5 - Drop low importance:** We fit a catboost model by dropping all feature importances of the all extras model lower than a certain threshold.  
 
-6 - Impute missing values: In this method we try to impute missing values in order to see if  this could improve performance using the all extras dataset. The imputing strategy was again based on groups. And we compute the mean value on groups for numerical values and the mode for categorical features (majority vote). If the group only has missing values we group at a less granular level.  
+**6 - Impute missing values:** In this method we try to impute missing values in order to see if this could improve performance using the all extras dataset. The imputing strategy was again based on groups. We compute the mean value on groups for numerical values and the mode for categorical features (majority vote). If the group only has missing values within a group, we group at a less granular level.  
 
 
-The results can be found below: 
+✅ **Advantages of this method: **
+
+* Categorical variables handled automatically and intelligently
+* Robust to outliers
+* No need to group data
+* Performance isn't affected by multicolinearity
+
+❌ **Disadvantages of this method: **
+
+* Less interpretable: cannot trace how the prediction was made although can understand which features have the most impact
+* Heavy hyperparameter tuning
+* Long training times
+* Heavier model to load
+
+  
+**The result comparison of all methods can be found below: **
 
 |       |   ape_all_extras |   ape_drop_extras_and_options |   ape_drop_low_importance |   ape_drop_unpractical |   ape_impute_missing_values |   ape_options |   ape_remove_outliers |   ape_linreg |   ape_median |
 |:------|-----------------:|------------------------------:|--------------------------:|-----------------------:|----------------------------:|--------------:|----------------------:|-------------:|-------------:|
@@ -554,19 +569,141 @@ The results can be found below:
 | 99%   |            0.967 |                         0.995 |                     0.972 |                  0.944 |                       0.971 |         0.978 |                 1.1   |        1.146 |        1.996 |
 | max   |           45.584 |                        47.797 |                    47.282 |                 47.185 |                      49.541 |        43.087 |                47.003 |       51.695 |       51.03  |
 
+The final chosen model is the drop unpractial method which allows us to simplify the user experience of our estimation tool without compromising on performance. It also achieves an adjusted R squared of 0.92. The outlier method seems to perform worse than the other methods but this is logical considering that the model was trained on cleaner data but evaluated on the raw test set. However when we looked at the performance of this method only on non outlier points we did not notice a performance improvement, that is why we did not choose this method. COnsidering that the impute missing values method performs as well as without imputing them we decided not to perturb our data. 
 
+Each of these catboost model was optimised for hyperparamets using 3 fold validation before training on the whole training set, so we are certain that hyperparameters do not influence a method more than another. 
+
+We also tried to impose monotonic constraints on extras and other features but encountered severe performance degradation as well as unstabilities. 
 
 ### Analysis of the chosen model 
 
-Hyperparameters
-Feature importance
-Performance by registration year
-Residuals vs price
-Residuals vs mileage
-Residuals vs Engine size
-Residuals vs Engine power
-Error vs Brand
-Examples of high errors
+#### Hyperparameters
+
+The optimal hyperparameters of our model were the folowing: 
+
+{'random_strength': 0.01199857498,
+ 'verbose': 50,
+ 'iterations': 11333,
+ 'nan_mode': 'Max',
+ 'bagging_temperature': 0.8319957516,
+ 'grow_policy': 'Depthwise',
+ 'l2_leaf_reg': 0.6747582331,
+ 'loss_function': 'Quantile:alpha=0.5',
+ 'task_type': 'GPU',
+ 'depth': 9,
+ 'min_data_in_leaf': 92,
+ 'learning_rate': 0.02721930604}
+
+
+#### Feature importance
+
+![feature_importances_catboost](https://github.com/user-attachments/assets/a71b0f92-8bc4-4e67-920b-f3ccd7c87bba)
+
+
+#### Residuals vs price
+
+![pe_practical_price](https://github.com/user-attachments/assets/71414630-5199-4e9d-92ba-51b2012ef4e0)
+
+#### Performance by registration year
+
+![ape_practical_box_year](https://github.com/user-attachments/assets/3fcd36f6-a1fd-4e6f-9e30-0e46c1d329b9)
+
+
+#### Residuals vs Engine power
+
+![scatter_engine_power_ape](https://github.com/user-attachments/assets/5b9b90ae-4e27-4844-9758-6b08c2827342)
+
+#### Error vs Brand
+
+![ape_practical_bar_brand](https://github.com/user-attachments/assets/1b2fe732-44b6-4fc9-a7e0-4ecd10845ff5)
+
+
+#### Error vs fuel type
+
+![ape_practical_box_fuel](https://github.com/user-attachments/assets/f52d91a2-5611-4d4f-8dc1-cc6976f9cb7b)
+
+#### Error if crashed:
+
+![ape_practical_box_crashed](https://github.com/user-attachments/assets/60b198da-376f-438e-8f70-58038713652a)
+
+#### Error vs number of points per group model and year: 
+
+![scatter_group_count](https://github.com/user-attachments/assets/105ba205-5bd4-4cc3-b1b8-7f11ea5c66bf)
+
+
+Describe of errors with extras missing: 
+
+|       |   ape_drop_unpractical |   ape_drop_unpractical |
+|:------|-----------------------:|-----------------------:|
+| count |               3834     |              16452     |
+| mean  |                  0.21  |                  0.133 |
+| std   |                  0.396 |                  0.444 |
+| min   |                  0     |                  0     |
+| 1%    |                  0.002 |                  0.001 |
+| 5%    |                  0.01  |                  0.007 |
+| 25%   |                  0.054 |                  0.036 |
+| 50%   |                  0.123 |                  0.083 |
+| 75%   |                  0.239 |                  0.159 |
+| 90%   |                  0.429 |                  0.275 |
+| 95%   |                  0.617 |                  0.375 |
+| 99%   |                  1.464 |                  0.794 |
+| max   |                 13.207 |                 47.185 |
+
+
+Describe of errors in normal values:
+
+|       |   ape_drop_unpractical |
+|:------|-----------------------:|
+| count |        13864           |
+| mean  |            0.099785    |
+| std   |            0.155323    |
+| min   |            1.24249e-05 |
+| 1%    |            0.00109708  |
+| 5%    |            0.00592297  |
+| 25%   |            0.0318868   |
+| 50%   |            0.0722225   |
+| 75%   |            0.131778    |
+| 90%   |            0.211244    |
+| 95%   |            0.274392    |
+| 99%   |            0.46893     |
+| max   |           13.2074      |
+Describe of features for errors > 98th percentile
+
+|       |   raw_price |   registration_year |   engine_size |   mileage |   ape_drop_unpractical |
+|:------|------------:|--------------------:|--------------:|----------:|-----------------------:|
+| count |      406    |           406       |       406     |       406 |             406        |
+| mean  |     7352.75 |          2006.3     |      1934.07  |    168374 |               1.44206  |
+| std   |    19620.9  |             4.63368 |       977.081 |    140922 |               2.67159  |
+| min   |      600    |          2001       |         0     |         0 |               0.679464 |
+| 1%    |      600    |          2001       |         1     |         0 |               0.681008 |
+| 5%    |      700    |          2001       |       824.5   |         1 |               0.688687 |
+| 25%   |     1500    |          2003       |      1400     |     80000 |               0.785516 |
+| 50%   |     2500    |          2005       |      1800     |    157500 |               0.944885 |
+| 75%   |     4500    |          2008       |      2107.25  |    222000 |               1.37181  |
+| 90%   |     9700    |          2012       |      2998     |    300000 |               2.07766  |
+| 95%   |    25000    |          2016.75    |      3775     |    435500 |               2.87455  |
+| 99%   |   111111    |          2021.95    |      5275.5   |    671250 |               7.21141  |
+| max   |   180000    |          2025       |     10000     |    999999 |              47.1849   |
+
+We see that 90% of the very large errors are on models older  than 2012  and on very low real prices. We also see the case of wrong engine sizes (0 or 1) and mileages set to 0. In fact we saw we had certain points where user enters mileage 0 or 1 for spare parts. 
+
+
+#### Examples of high errors
+
+We see below that large errors are on outliers with low prices. We see a car being sold as a seasonal rental, cars sold for spare parts, some needing repairs. Of course our model will overestimate the value of such cars and this is where nlp could be useful to improve the performance of our model. In fact appart from is crashed we do not have any information about the condition of the car. 
+
+|       | brand         | model        |   registration_year |   engine_size | description                                        |   raw_price |   pred_unpractical |   ape_drop_unpractical |
+|------:|:--------------|:-------------|--------------------:|--------------:|:---------------------------------------------------|------------:|-------------------:|-----------------------:|
+| 95705 | mitsubishi    | pajero pinin |                2004 |          2000 | πωλειται το μοτερ απο αυτο το αυτοκινητο.ειναι σε  |        1200 |            4696.73 |                2.91395 |
+| 49505 | volkswagen    | polo         |                2001 |          1400 | θελει μαζεματα.κτεο και σημα του 2025              |         650 |            2441.63 |                2.75636 |
+| 43440 | skoda         | octavia      |                2012 |          1600 | σε αριστη κατασταση με ολα του τα service δεκτος κ |        2000 |            7501.5  |                2.75075 |
+| 62962 | mercedes-benz | vito         |                2025 |          1950 | αφορα μισθωση σεζον,,,καλεστε 6937442443 για περισ |       16000 |           58125.4  |                2.63284 |
+| 89302 | mercedes-benz | cla 180      |                2010 |          1600 | αγοραζονται αμεσα τοις μετρητοις τρακαρισμενα   η  |        5000 |           17946.3  |                2.58926 |
+| 39274 | opel          | vectra       |                2007 |          1800 | διαφορα ανταλλακτικα απο το εικονιζομενο..μοτερ αψ |         600 |            2140.19 |                2.56699 |
+| 16758 | opel          | vectra       |                2002 |             1 | , μονο για ανταλλακτικα παρακαλω                   |         750 |            2610.74 |                2.48098 |
+| 49743 | chevrolet     | matiz        |                2005 |          1000 | το αυτοκινητο κινητε κανονικα ειναι για ανταλλακτι |         840 |            2895.61 |                2.44716 |
+| 44707 | skoda         | fabia        |                2006 |          1400 | nan                                                |        1790 |            6150.91 |                2.43626 |
+| 47957 | alfa romeo    | alfa 156     |                2002 |          1600 | θελει καποια μαζεματα το αμαξι δουλευει κανονικα ε |         700 |            2396.7  |                2.42386 |
 
 
 ### Reliability of the estimation:
