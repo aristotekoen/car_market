@@ -26,13 +26,13 @@
 ## 🤖 How does this work?  
 This **machine learning model** estimates the price of a used car based on various features such as **brand, model, mileage, registration year, engine, and more**.  
 
-📊 The model was trained on real **used car listings from Greek websites**, so the predictions reflect the **Greek market**.  
+The model was trained on real **used car listings from Greek websites**, so the predictions reflect the **Greek market**.  
 
 **Simply fill in the details** and click the **Predict** button to get:
-- An **estimated price** for your car 💰
-- A **price range** (low & high) 📈
-- A **confidence level** for accuracy 🎯
-- An analysis of the **effect of the main features on your car price** 📊
+- An **estimated price** for your car 
+- A **price range** (low & high) 
+- A **confidence level** for accuracy 
+- An analysis of the **effect of the main features on your car price** 
 
 
 ## 🗺️ Context of this project:
