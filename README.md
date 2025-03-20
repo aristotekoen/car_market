@@ -398,8 +398,8 @@ With a threshold of 1 we obtain a mean absolute percentage error of 22%. Below i
 
 ✅ Advantages of this model: 
  
-  *simple approach
-  *easily interpretable
+  * Simple approach
+  * Easily interpretable
 
 ❌ Disadvantages of this model: 
 
