@@ -768,42 +768,52 @@ where:
 
 This sigmoid function takes values on $\mathbb{R}$ and is bounded by 0 and 1. The constant c here represents the percentage size of the IQR size on which the sigmoid is centered, at which the score equals 0.5. $\lambda$ determines how steep the sigmoid function is around c and how fast it gets close to 0 or 1. 
 
-If we look at the describe of the percentage size of the estimated IQR with respect to the median we see that the median uncertainty equals 15%, that means when the model estimates a price with +/- 7.5% certainty. We see that the 90th percentile equals 34%, therefore we will want the score to reach a score close to 0 at around 90%. 
+If we look at the describe of the uncertainty $u$ (normalised IQR size) on the test set we see that the median uncertainty equals 15%, we can interpret this as:  50% of the times the model estimates a price with more than +/- 7.5% certainty. We see that the 90th percentile equals 34%. We will want a score that reaches a score close to 0 at this value and more. 
 
 ![image](https://github.com/user-attachments/assets/80c077f5-9348-4bc1-a0b6-f2c5b19032e5)
 
 
-We decide that we will consider a score of 0.5 when the level of uncertainty is of +/- 10% that is for c = 0.2 (20% of the median estimation).  We will consider the score reliable when the reliability score is above 75%, we will consider it unreliable when between 25% and 75%, and very unreliable when below 25%. 
+We decide that we will consider a score 0.5/1 when the level of uncertainty is of +/- 10% that is for c = 0.2.  We will consider the score reliable when the reliability score is above 75%, we will consider it unreliable when between 25% and 75%, and very unreliable when below 25%.   
+
+If we plot the Reliability score $R$ with respect to the uncertainty $u$ for various values of the shape parameter, we can see that for $\lambda = 25$, the score is below 5% for $u = 0.35$ and that it is above 90% when $u=0.1$ (meaning the model estimates the price at +/- 5%. We also see that for this value of the shape parameter, for the score equals 73% and above for uncertainties below 15% (meaning a price estimation at +/- 7.5% reliability).
 
 ![reliability_score](https://github.com/user-attachments/assets/d48c99f7-9cdc-41d6-a9a4-f8aeb3c112b5)
 
+We therefore choose $\lambda = 25$. Now we compute the uncertainty scores of the predictions on the test set and analyse uncertainties vs various features: 
 
+We can see below that the estimations are more reliable for newer models vs older models which makes a lot of sense considering our analysis of the model's behaviour. 
+
+  
 ![boxplot_reliability_per_year](https://github.com/user-attachments/assets/b8c0589c-41c1-4e7a-b161-afd863f3f373)
+
+We can see that low reliability scores for the same brands where the model did not perform well (premium brands or rare brands). What is interesting is that we had seen that our data had a problem regarding brands like mercedes and bmws where the model name is differentiated on the engine size leading to a wide array of models and therefore less data per model. Also, mercedes and bmws are very sought after on the greek market (some of the most dominant brands in the set) and there are many old models of these brands present on the dataset. We can see that the model displays higher levels of uncertainty on these common brands compared to other ones. We can also see that the model is very certain for certain rare brands like lotus, lynk and co. 
 
 ![reliability_by_brand](https://github.com/user-attachments/assets/b47e98a5-567a-4a81-a27b-67e013386880)
 
+Here we plot the percentage error on the train set with respect to the reliability score. We can see that as the score increases the errors are more concentrated towards zero than for low scores.
 
-50% of the data has a reliability below 73%. 
+![reliability_error](https://github.com/user-attachments/assets/d5566fe3-74f5-415f-a14d-b90bd03c4412)
+
+Below a describe the reliability score on the test set: 
 
 ![image](https://github.com/user-attachments/assets/02bacb5b-4818-4942-836b-0d845c6b2129)
 
+If we look at the reliability score of each point on the test set vs the number of points within the brand,model, year level group, we can see that the more points we have in a group the more reliable the estimation of a car within that group is. 
+
+![reliability_count](https://github.com/user-attachments/assets/edb090b2-9713-457f-ad48-2aa701c0d7ec)
+
+Below the distribution of our reliability score.
+
 ![image](https://github.com/user-attachments/assets/53f12a55-b7e2-4c2b-aa6b-bebfe79c02f6)
+
+We see below larger errors for samples with a low reliability score. 
 
 ![image](https://github.com/user-attachments/assets/45a9cf3e-6ef9-422c-8323-22e206b0f5ef)
 
 
 ## Interpretability:
 
-Feature importances:
-
-Below we plot the feature importances of the chose catboost model: 
-
-
-![feature_importances_catboost](https://github.com/user-attachments/assets/721ae31b-b28d-4b02-aa99-c8b6edecaa9f)
-
-We see that the most important features are the engine size, power, brand, model, gearbox type, mileage, registration year.  
-
-In order for the user to get an idea of the way features such as mileage, engine power or extras would affect the price we display the Individual COnditional Expectation (ICE) plot which shows the predicted price for a range of values of the analysed feature, keeping all others fixed.
+In order for the user to get an idea of the way features such as mileage, engine power or extras would affect the price we display the Individual Conditional Expectation (ICE) plot which shows the predicted price for a range of values of the analysed feature, keeping all others fixed.
 
 As an example, the user here estimates a suzuki swift with 150000km from 2015, with 1200cc engine size, 70bhp. 
 ![image](https://github.com/user-attachments/assets/e41bcc08-1225-4e27-afa3-85809f1746ee)
