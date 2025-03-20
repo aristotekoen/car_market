@@ -597,41 +597,60 @@ The optimal hyperparameters of our model were the folowing:
 
 #### Feature importance
 
+We can see that mileage, model, brand, year, rim size, doors, fueltype, gearbox type, drive type, seats are the most important features. Extras don't seem to be so important one by one but if we sum their importance their summed importance represents 2.15, that is almost as important as rim size (2.4). We can also see which extras are the most influential and it seems reasonable (air suspension, power seats, heated seats, rear view camera, panoramic roof, leather seats). They are all premium options and drive prices up significantly.  
+
 ![feature_importances_catboost](https://github.com/user-attachments/assets/a71b0f92-8bc4-4e67-920b-f3ccd7c87bba)
+
 
 
 #### Residuals vs price
 
+We can see that the model makes very large overstimation errors on very low prices and tend to underestimate very expensive cars. 
+
 ![pe_practical_price](https://github.com/user-attachments/assets/71414630-5199-4e9d-92ba-51b2012ef4e0)
 
 #### Performance by registration year
+
+Below we see that the model performs worse on cars older than 2010.
 
 ![ape_practical_box_year](https://github.com/user-attachments/assets/3fcd36f6-a1fd-4e6f-9e30-0e46c1d329b9)
 
 
 #### Residuals vs Engine power
 
+We can see some abnormal points with zero or 1 engine power where the model makes errors. These should have been cleaned better. 
+
 ![scatter_engine_power_ape](https://github.com/user-attachments/assets/5b9b90ae-4e27-4844-9758-6b08c2827342)
 
 #### Error vs Brand
+
+We can see that the model makes larger errors on brands which are not common or very premium such as China motor or Lamborghinis. However it performs better on common brands such as citroen, ds, peugeot, audi etc. We will see also that this is probably due to the fact that these brands are less represented in the dataset. 
 
 ![ape_practical_bar_brand](https://github.com/user-attachments/assets/1b2fe732-44b6-4fc9-a7e0-4ecd10845ff5)
 
 
 #### Error vs fuel type
 
+We can see that the model makes larger errors on lpg, cng, other, electric cars which are under represented in the dataset. 
+
 ![ape_practical_box_fuel](https://github.com/user-attachments/assets/f52d91a2-5611-4d4f-8dc1-cc6976f9cb7b)
 
 #### Error if crashed:
+
+We can see that the model performs much better on cars which aren't sold crashed.
 
 ![ape_practical_box_crashed](https://github.com/user-attachments/assets/60b198da-376f-438e-8f70-58038713652a)
 
 #### Error vs number of points per group model and year: 
 
+We can see a tendency to more accurately estimate cars belonging to a group which is well represented in the data. 
+
 ![scatter_group_count](https://github.com/user-attachments/assets/105ba205-5bd4-4cc3-b1b8-7f11ea5c66bf)
 
 
-Describe of errors with extras missing: 
+#### Describe of errors when extras are not mentioned: 
+
+We saw that we had about 20% of the ads where users did not mention any extra. We can see that on these ads the model performs worse than when they are mentioned. 
 
 |       |   ape_drop_unpractical |   ape_drop_unpractical |
 |:------|-----------------------:|-----------------------:|
@@ -650,7 +669,17 @@ Describe of errors with extras missing:
 | max   |                 13.207 |                 47.185 |
 
 
-Describe of errors in normal values:
+#### Describe of errors when selecting usual cars:
+
+Here we select cars which are more likely to be estimated by our users that is cars:
+
+* With a price higher than 2000 euros
+* Not crashed
+* From 2008 onwards
+* With a mileage greater than 5000 kms
+* With a fuel type that is not lpg, cng, electric or other
+
+We see that for such cars the model achieves a 10% mean absolute percentage error and a 7.2% median absolute percentage error with less than 20% error in 90% of the cases. 
 
 |       |   ape_drop_unpractical |
 |:------|-----------------------:|
@@ -667,7 +696,9 @@ Describe of errors in normal values:
 | 95%   |            0.274392    |
 | 99%   |            0.46893     |
 | max   |           13.2074      |
-Describe of features for errors > 98th percentile
+
+
+#### Describe of features for errors greated than the 98th percentile
 
 |       |   raw_price |   registration_year |   engine_size |   mileage |   ape_drop_unpractical |
 |:------|------------:|--------------------:|--------------:|----------:|-----------------------:|
@@ -685,7 +716,7 @@ Describe of features for errors > 98th percentile
 | 99%   |   111111    |          2021.95    |      5275.5   |    671250 |               7.21141  |
 | max   |   180000    |          2025       |     10000     |    999999 |              47.1849   |
 
-We see that 90% of the very large errors are on models older  than 2012  and on very low real prices. We also see the case of wrong engine sizes (0 or 1) and mileages set to 0. In fact we saw we had certain points where user enters mileage 0 or 1 for spare parts. 
+We see that 90% of the very large errors are on models older than 2012 and on very low real prices. We also see the case of wrong engine sizes (0 or 1) and mileages set to 0. In fact we saw we had certain points where user entered mileage 0 or 1 for spare parts. 
 
 
 #### Examples of high errors
