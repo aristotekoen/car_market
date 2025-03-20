@@ -13,12 +13,13 @@
 - [⚙️ Model Training](#%EF%B8%8F-modelling-the-data)  
   - [Baseline Models](#base-model)
   - [Grouped Linear Regression](#grouped-linear-regression)
-  - [Gradient Boosting](#gradient-boosting-catboost)   
-- [📈 Model Performance - Error Analysis](#analysis-of-the-chosen-model)
-- [🟢 Reliability Score Calculation](#reliability-of-the-estimation)  
+  - [Gradient Boosting](#gradient-boosting-catboost)
+  - [Performance Comparison](#performance-comparison-of-all-methods) 
+- [📈 Chosen Model Performance Analysis](#analysis-of-the-chosen-model)
+- [🟢 Reliability Score](#reliability)  
 - [🧐 Model Interpretability](#interpretability)  
 - [🚀 Deployment](#deployment)  
-- [🔍 Challenges, Limitations, and Future Improvements](#conclusion-challenges-weaknesses-and-potential-improvements)  
+- [🔍 Conclusion, Challenges, Limitations, and Future Improvements](#conclusion-challenges-weaknesses-and-potential-improvements)  
 - [📬 Contact](#contact)  
 
 
@@ -477,13 +478,13 @@ Residuals seem to be normally distributed
 
 ![image](https://github.com/user-attachments/assets/c883fcaf-5499-4b15-a856-812706df399f)
 
-✅ **Advantages of this model: **
+✅ **Advantages of this model:**
  
   * simple approach
   * easily interpretable
   * Leveraging linear relationships within the data
 
-❌ **Disadvantages of this model: **
+❌ **Disadvantages of this model:**
 
 * We couldn't include all our categorical variables as this would lead to a very high number of one hot encoded features
 * Imputing missing values on very sparse features is necessary and could be misleading
@@ -529,14 +530,14 @@ We choose to optimise the MAE loss (same as estimating the median price instead 
 **6 - Impute missing values:** In this method we try to impute missing values in order to see if this could improve performance using the all extras dataset. The imputing strategy was again based on groups. We compute the mean value on groups for numerical values and the mode for categorical features (majority vote). If the group only has missing values within a group, we group at a less granular level.  
 
 
-✅ **Advantages of this method: **
+✅ **Advantages of this method:**
 
 * Categorical variables handled automatically and intelligently
 * Robust to outliers
 * No need to group data
 * Performance isn't affected by multicolinearity
 
-❌ **Disadvantages of this method: **
+❌ **Disadvantages of this method:**
 
 * Less interpretable: cannot trace how the prediction was made although can understand which features have the most impact
 * Heavy hyperparameter tuning
@@ -544,7 +545,7 @@ We choose to optimise the MAE loss (same as estimating the median price instead 
 * Heavier model to load
 
   
-**The result comparison of all methods can be found below: **
+### Performance comparison of all methods:
 
 |       |   ape_all_extras |   ape_drop_extras_and_options |   ape_drop_low_importance |   ape_drop_unpractical |   ape_impute_missing_values |   ape_options |   ape_remove_outliers |   ape_linreg |   ape_median |
 |:------|-----------------:|------------------------------:|--------------------------:|-----------------------:|----------------------------:|--------------:|----------------------:|-------------:|-------------:|
@@ -730,7 +731,7 @@ We see below that large errors are on outliers with low prices. We see a car bei
 | 47957 | alfa romeo    | alfa 156     |                2002 |          1600 | θελει καποια μαζεματα το αμαξι δουλευει κανονικα ε |         700 |            2396.7  |                2.42386 |
 
 
-## Reliability of the estimation:
+## 🟢 Reliability
 
 We want to know how reliable is the model's prediction and to be able to give a price range to the user.
   
@@ -804,7 +805,7 @@ We see below larger errors for samples with a low reliability score.
 ![image](https://github.com/user-attachments/assets/45a9cf3e-6ef9-422c-8323-22e206b0f5ef)
 
 
-## Interpretability:
+## 🧐 Interpretability:
 
 In order for the user to get an idea of the way features such as mileage, engine power or extras would affect the price we display the Individual Conditional Expectation (ICE) plot which shows the predicted price for a range of values of the analysed feature, keeping all others fixed.
 
@@ -822,13 +823,13 @@ It is interesting to see that the model becomes uncertain for unusual large engi
 
 
 
-## Deployment
+## 🚀 Deployment
 
 The model was deployed on google cloud run as a streamlit app containerised on google container registry. The model and experiments for training were run on a vm instance on google cloud platform in order to leverage catboost gpu compatibility. The streamlit app allows the user to input all the features taken into account by the model and to estimate the price and price range and reliability score of the car. It then allows the user to visualise effects of all the variables taken into account by the model. 
 
 The app gets redeployed everytime code is pushed in the main branch via git actions. 
 
-## Conclusion, challenges, weaknesses and potential improvements
+## 🔍 Conclusion, challenges, weaknesses and potential improvements
 
 Through this project, we managed to crawl car listing websites, store the ads, clean and extract the data from them in order to create a dataset representative of the Greek used car market. We then preprocessed the data in order to train various price estimation machine learning models on this data. We explored various preprocessing techniques and identified abnormalities and challenges within the dataset. We were able to deploy a model on a streamlit app using google cloud platform and to construct and display uncertainty metrics to the user as well as an interpretation of the model's behaviour to the user. 
 
@@ -848,7 +849,7 @@ The nature of the data and the time it took to scrape, clean and preprocess it u
 
 Thank you for your attention and looking forward to any feedback, ideas or insights that you may have! 
 
-## Contact
+## 📬 Contact
 
 Name: Aristotelis Koen
 Email: aristotekoen@gmail.com
