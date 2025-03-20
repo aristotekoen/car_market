@@ -739,24 +739,34 @@ We see below that large errors are on outliers with low prices. We see a car bei
 
 ### Reliability of the estimation:
 
-We want to know how reliable is the model's prediction. And we want to be able to give a low price and a high price to the user. In order to do this we trained 3 catboost models which estimates the median price, one which estimates the first quartile and one which estimates the third quartile. This enables us to get a range as well as an estimation. To train the q1 and q3 model we used the same hyperparameters found for q2 for the sake of simplicity.
+We want to know how reliable is the model's prediction and to be able to give a price range to the user.
+  
+In order to do this we trained 3 catboost models one which estimates the median price (MAE loss), one which estimates the first quartile and one which estimates the third quartile.  
+  
+This enables us to get a range as well as an estimation. To train the q1 and q3 model we used the same hyperparameters found for q2 for the sake of simplicity.
 
+Now we wish to construct a reliability indicator.  
 
+In order to do this we can consider that the larger the estimated price range $q_3 - q_1$ is with $q_1$ the low price and $q_3$ the high price, the more uncertain the estimation is.
 
-Now we can consider that the larger the range is with respect to the estimated price, the more uncertain the estimation is. Based on this idea we construct a reliability metric. We could calculate the difference between q3 and q1 normalised by the estimated price, however this measure is unbounded and therefore it is difficult to interpret for the user. Ideally we would like to have an indicator between 0 and 1 wher 1 means very reliable and 0 unreliable. 
+Based on this idea we construct a reliability metric. One issue with just using $q_3 - q_1$ is that for a car with a high price (100000 EUR), an interquartile range of 10 000 euros (10% of the car's price) isn't as bad as an IQR size of 10 000 euros for a car worth 20 000 euros (50% of the price). Therefore we will consider our uncertainty to be theinterquartile range size normalised by the predicted price which we will denote $u$ (for uncertainty) and which is defined as   
 
-For this we can use a sigmoid function on the normalised interquartile range of the estimation. of the form 
+$u =\frac{q_3-q_1}{q_2}$  
+
+Now this is a more adequate measure of uncertainty but there remains another issue, this metric is unbounded meaning that without a point of reference it would be hard to interpret its value. Ideally we would like to have an indicator between 0 and 1 where 1 means very reliable and 0 unreliable. 
+
+In order to do this we use a sigmoid function on our normalised interquartile range size. And we define our reliability metric as:  
 
 ![equation(1)](https://github.com/user-attachments/assets/b688d563-87ef-45b0-966c-9edd08db4e9d)
 
 where:
-- \(q_1\) represents the first quartile estimation,
-- \(q_2\) represents the median estimation,
-- \(q_3\) represents the third quartile estimation
-- \(c\) is the value on which the sigmoid is centered,
-- \(\lambda\) (lambda) is a shape parameter controlling the sensitivity of the function.
+- $q_1$ represents the first quartile estimation,
+- $q_2$ represents the median estimation,
+- $q_3$ represents the third quartile estimation
+- $c$ is the value on which the sigmoid is centered,
+- $\lambda$ is a shape parameter controlling the sensitivity of the function.
 
-We can interpret the ratio (q3 - q1)/q2 as the size of the IQR as a percentage of the median estimation. The constant c represents the percentage size of the IQR which we consider to be a score of 0.5. Lambda determines how steep the sigmoid function is around c and how fast it gets close to 0 or 1. 
+This sigmoid function takes values on $\mathbb{R}$ and is bounded by 0 and 1. The constant c here represents the percentage size of the IQR size on which the sigmoid is centered, at which the score equals 0.5. $\lambda$ determines how steep the sigmoid function is around c and how fast it gets close to 0 or 1. 
 
 If we look at the describe of the percentage size of the estimated IQR with respect to the median we see that the median uncertainty equals 15%, that means when the model estimates a price with +/- 7.5% certainty. We see that the 90th percentile equals 34%, therefore we will want the score to reach a score close to 0 at around 90%. 
 
