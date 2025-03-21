@@ -45,7 +45,7 @@ def load_model(name):
             blob = bucket.blob(f"models/catboost_{name}.cbm")
             blob.download_to_filename(model_name)
 
-    cb = CatBoostRegressor().load_model(model_name)
+        cb = CatBoostRegressor().load_model(model_name)
     return cb
 
 @st.cache_resource(show_spinner=False)
