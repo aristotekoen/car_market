@@ -12,6 +12,9 @@ from const import *
 from interpretability import pdp_cat, pdp_num
 from reliability import reliability_score
 
+from threading import Lock
+_model_lock = Lock()
+
 if "user_input" not in st.session_state:
     st.session_state["user_input"] = None
 if "df_input" not in st.session_state:
@@ -32,10 +35,12 @@ if "catboost_model_3" not in st.session_state:
 
 @st.cache_resource(show_spinner=False)
 def load_model(name):
+    with _model_lock:
+        model_name = f"catboost_{name}.cbm"
     client = storage.Client()
     bucket = client.get_bucket("price-estimation")
     blob = bucket.blob(f"models/catboost_{name}.cbm")
-    model_name = f"catboost_{name}.cbm"
+
     blob.download_to_filename(model_name)
     cb = CatBoostRegressor().load_model(model_name)
     return cb
