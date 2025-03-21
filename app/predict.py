@@ -1,6 +1,7 @@
 import pickle
 from io import BytesIO
 from threading import RLock
+import os
 
 import numpy as np
 import pandas as pd
@@ -11,6 +12,7 @@ from google.cloud import storage
 from const import *
 from interpretability import pdp_cat, pdp_num
 from reliability import reliability_score
+from streamlit.runtime.scriptrunner import get_script_run_ctx
 
 from threading import Lock
 _model_lock = Lock()
@@ -37,13 +39,26 @@ if "catboost_model_3" not in st.session_state:
 def load_model(name):
     with _model_lock:
         model_name = f"catboost_{name}.cbm"
-    client = storage.Client()
-    bucket = client.get_bucket("price-estimation")
-    blob = bucket.blob(f"models/catboost_{name}.cbm")
+        if not os.path.exists(model_name):
+            client = storage.Client()
+            bucket = client.get_bucket("price-estimation")
+            blob = bucket.blob(f"models/catboost_{name}.cbm")
+            blob.download_to_filename(model_name)
 
-    blob.download_to_filename(model_name)
     cb = CatBoostRegressor().load_model(model_name)
     return cb
+
+@st.cache_resource(show_spinner=False)
+def preload_models():
+    model_1 = load_model("q1")
+    model_2 = load_model("q2")
+    model_3 = load_model("q3")
+    return model_1, model_2, model_3
+
+user_agent = st.request.headers.get("User-Agent", "") if hasattr(st, "request") else ""
+if "Google-Cloud-Scheduler" in user_agent:
+    preload_models()
+    st.stop()
 
 
 @st.cache_data(show_spinner=False)
@@ -93,13 +108,11 @@ st.markdown(
 ### 🤖 How does this work?  
 This **machine learning model** estimates the price of a used car based on various features such as **brand, model, mileage, registration year, engine, and more**.  
 
-📊 The model was trained on real **used car listings from Greek websites**, so the predictions reflect the **Greek market**.  
+The model was trained on real **used car listings from Greek websites**, so the predictions reflect the **Greek market**.  
 
 ✅ **Simply fill in the details** and click the **Predict** button to get:
 - An **estimated price** for your car 💰
 - A **price range** (low & high) 📈
-
-Coming soon:
 - A **confidence level** for accuracy 🎯
 - Analysis of the impact of the main features on your car price
 """
@@ -273,9 +286,7 @@ if st.button("Predict car price", use_container_width=True):
     st.session_state["reliability"] = None
     with st.spinner("Estimating car price..."):
 
-        catboost_model = load_model("q2")
-        catboost_model_1 = load_model("q1")
-        catboost_model_3 = load_model("q3")
+        catboost_model_1,catboost_model , catboost_model_3 = preload_models()
 
         st.session_state["catboost_model_1"] = catboost_model_1
         st.session_state["catboost_model"] = catboost_model
