@@ -55,9 +55,13 @@ def preload_models():
     model_3 = load_model("q3")
     return model_1, model_2, model_3
 
+catboost_model_1,catboost_model , catboost_model_3 = preload_models()
+st.session_state["catboost_model_1"] = catboost_model_1
+st.session_state["catboost_model"] = catboost_model
+st.session_state["catboost_model_3"] = catboost_model_3
+
 user_agent = st.request.headers.get("User-Agent", "") if hasattr(st, "request") else ""
 if "Google-Cloud-Scheduler" in user_agent:
-    preload_models()
     st.stop()
 
 
